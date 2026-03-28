@@ -20,11 +20,12 @@
 
 #define LEGACY LegacyHandler
 #define HW3 HW3Handler
-#define HW4 HW4Handler
+#define HW4 HW4Handler //HW4 since Version 2026.2.3 uses FSDV14, before that compile for HW3, even for HW4 vehicles.
+
+
 #define HW HW3  //for what car to compile
 
 bool enablePrint = true;
-
 
 
 #define LED_PIN PIN_LED                // onboard red LED (GPIO13)
@@ -165,9 +166,6 @@ struct HW4Handler : public CarManagerBase {
       if(index == 2){
         frame.data[7] &= ~(0x07 << 4);
         frame.data[7] |= (speedProfile & 0x07) << 4;
-        // writeBits(frame.data, 60, 3, speedProfile);
-        //Serial.printf("Current offset: %d\n", 60 + offset);
-        //printBits(frame.data, 8);
         mcp->sendMessage(&frame);
       }
       if (index == 0 && enablePrint) {
@@ -183,9 +181,7 @@ std::unique_ptr<CarManagerBase> handler;
 
 void setup() {
   handler = std::make_unique<HW>();
-  delay(1500);  // let USB enumerate
-  // pinMode(LED_PIN, OUTPUT);
-  // digitalWrite(LED_PIN, LOW);
+  delay(1500); 
   Serial.begin(115200);
   unsigned long t0 = millis();
   while (!Serial && millis() - t0 < 1000) {}
