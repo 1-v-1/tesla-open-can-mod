@@ -34,6 +34,9 @@ bool enablePrint = true;
 #define CAN_STBY PIN_CAN_STANDBY       // GPIO16
 #define CAN_RESET PIN_CAN_RESET        // GPIO18
 
+// HW4 FSD V14 options
+#define ENABLE_APPROACHING_EMERGENCY_VEHICLE_DETECTION = true
+
 std::unique_ptr<MCP2515> mcp;
 
 struct CarManagerBase {
@@ -168,6 +171,9 @@ struct HW4Handler : public CarManagerBase {
       if (index == 0 && FSDEnabled) {
         setBit(frame, 46, true);
         setBit(frame, 60, true);
+        if (ENABLE_APPROACHING_EMERGENCY_VEHICLE_DETECTION) {
+          setBit(frame, 59, true)
+        }
         mcp->sendMessage(&frame);
       }
       if (index == 1) {

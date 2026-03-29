@@ -32,6 +32,9 @@ This firmware runs on an Adafruit CAN Bus FeatherWing (MCP25625/MCP2515-based). 
 - Reads the follow-distance stalk setting
 - Maps it dynamically to a speed profile
 
+⚙️ HW4 - FSD V14 Features
+- Approaching Emergency Vehicle Detection
+
 ### Supported Hardware Variants
 
 Select your hardware in CanFeather.ino via the #define HW directive:
