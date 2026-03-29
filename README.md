@@ -102,6 +102,16 @@ The recommended connection point is the [**X179 connector**](https://service.tes
 
 Connect the Feather's CAN-H and CAN-L lines to pins 13 and 14 on the X179 connector.
 
+The recommended connection point for legacy Model 3 (2020 and earlier) is the [**X652 connector**](https://service.tesla.com/docs/Model3/ElectricalReference/prog-187/connector/x652/) if the vehicle is not equipped with the X179 port (varies depending on production date):
+| Pin | Signal |
+|-----|--------|
+| 1  | CAN-H  |
+|  2  | CAN-L  |
+
+Connect the Feather's CAN-H and CAN-L lines to pins 1 and 2 on the X652 connector.
+
+
+
 **Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
 
 ## Speed Profiles
