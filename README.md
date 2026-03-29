@@ -2,7 +2,7 @@
 
 > **Why is this public?** Some sellers charge up to 500 € for a solution like this. In our opinion, that is massively overpriced. The board costs around 20 €, and even with labor factored in, a fair price is no more than 50 €. This project exists so nobody has to overpay.
 
-## Prerequisites
+## 📌 Prerequisites
 
 **You must have an active FSD package on the vehicle** — either purchased or subscribed. This board enables the FSD functionality on the CAN bus level, but the vehicle still needs a valid FSD entitlement from Tesla.
 
@@ -14,15 +14,27 @@ If FSD subscriptions are not available in your region, you can work around this 
 
 This allows you to activate an FSD subscription from anywhere in the world.
 
-## What It Does
+## 🛠️ What It Does
 
-This firmware runs on an **Adafruit CAN Bus FeatherWing** (MCP25625/MCP2515-based) and intercepts specific CAN bus messages on a Tesla vehicle to enable and configure **Full Self-Driving (FSD)** functionality.
+This firmware runs on an Adafruit CAN Bus FeatherWing (MCP25625/MCP2515-based). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD).
 
-It listens for autopilot-related CAN frames on the vehicle's CAN bus and checks whether **"Traffic Light and Stop Sign Control"** is enabled in the vehicle's Autopilot settings. When this setting is turned on, the chip treats it as the trigger to enable **Full Self-Driving** by modifying the relevant bits in the CAN frame and re-transmitting it onto the bus. It also reads the follow-distance stalk setting and maps it to a speed profile.
+🚗 Core Function
+- Intercepts specific CAN bus messages
+- Re-transmits them onto the vehicle bus
+
+
+🧠 FSD Activation Logic
+- Listens for Autopilot-related CAN frames
+- Checks if "Traffic Light and Stop Sign Control" is enabled in the Autopilot settings Uses this setting as a trigger for Full Self-Driving (FSD)
+- Adjusts the required bits in the CAN message to activate FSD
+
+⚙️ Additional Behavior
+- Reads the follow-distance stalk setting
+- Maps it dynamically to a speed profile
 
 ### Supported Hardware Variants
 
-The firmware supports three Tesla hardware generations, selected at compile time via the `#define HW` directive:
+Select your hardware in CanFeather.ino via the #define HW directive:
 
 | Define   | Target           | Listens on CAN IDs | Notes |
 |----------|------------------|---------------------|-------|
@@ -102,6 +114,18 @@ The recommended connection point is the [**X179 connector**](https://service.tes
 
 Connect the Feather's CAN-H and CAN-L lines to pins 13 and 14 on the X179 connector.
 
+
+The recommended connection point for **legacy Model 3 (2020 and earlier)** is the [**X652 connector**](https://service.tesla.com/docs/Model3/ElectricalReference/prog-187/connector/x652/) if the vehicle is not equipped with the X179 port (varies depending on production date):
+| Pin | Signal |
+|-----|--------|
+| 1  | CAN-H  |
+|  2  | CAN-L  |
+
+Connect the Feather's CAN-H and CAN-L lines to pins 1 and 2 on the X652 connector.
+
+
+
+
 **Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
 
 ## Speed Profiles
@@ -118,28 +142,17 @@ Because the Legacy variant transmits follow distance differently, it uses a **sp
 | 29                   | Normal  |
 | 30                   | Hurry   |
 
-### HW3
+### HW3 & HW4 Profiles
 
-HW3 maps the **follow distance** setting to a speed profile:
 
-| Follow Distance | Profile |
-|-----------------|---------|
-| 2               | Hurry   |
-| 3               | Normal  |
-| 4               | Chill   |
 
-### HW4
-
-HW4 supports an extended range of five speed profiles via the **follow distance** setting:
-
-| Follow Distance | Profile |
-|-----------------|---------|
-| 2               | Max     |
-| 3               | Hurry   |
-| 4               | Normal  |
-| 5               | Chill   |
-| 6               | Sloth   |
-
+| Distance | Profile (HW3) | Profile (HW4) |
+| :--- | :--- | :--- |
+| 2 | ⚡ Hurry | 🔥 Max |
+| 3 | 🟢 Normal | ⚡ Hurry |
+| 4 | ❄️ Chill | 🟢 Normal |
+| 5 | — | ❄️ Chill |
+| 6 | — | 🐢 Sloth |
 ## Serial Monitor
 
 Open the Serial Monitor at **115200 baud** to see live debug output showing FSD state and the active speed profile. Disable logging by setting `enablePrint = false`.
