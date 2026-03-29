@@ -37,7 +37,7 @@ This firmware runs on an Adafruit CAN Bus FeatherWing (MCP25625/MCP2515-based). 
 
 ### Supported Hardware Variants
 
-Select your hardware in CanFeather.ino via the #define HW directive:
+Select your hardware in RP2040CAN.ino via the #define HW directive:
 
 | Define   | Target           | Listens on CAN IDs | Notes |
 |----------|------------------|---------------------|-------|
@@ -94,7 +94,7 @@ Install the following library via **Sketch → Include Library → Manage Librar
 
 ### 4. Select Your Hardware Target
 
-Near the top of `CanFeather.ino`, change the `HW` define to match your vehicle:
+Near the top of `RP2040CAN.ino`, change the `HW` define to match your vehicle:
 
 ```cpp
 #define HW HW3  // Change to LEGACY, HW3, or HW4
