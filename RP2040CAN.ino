@@ -39,6 +39,7 @@ bool enablePrint = true;
 
 // HW4 FSD V14 options
 #define ENABLE_APPROACHING_EMERGENCY_VEHICLE_DETECTION true
+#define ENABLE_ISA_SPEED_CHIME_SUPPRESS false // suppresses ISA speed chime, but speed limit sign will be empty while driving
 
 std::unique_ptr<MCP2515> mcp;
 
@@ -161,6 +162,15 @@ struct HW3Handler : public CarManagerBase {
 
 struct HW4Handler : public CarManagerBase {
   virtual void handelMessage(can_frame& frame) override {
+    if (ENABLE_ISA_SPEED_CHIME_SUPPRESS && frame.can_id == 921) {
+      frame.data[1] |= 0x20;
+      uint8_t sum = 0;
+      for (int i = 0; i < 7; i++) sum += frame.data[i];
+      sum += (921 & 0xFF) + (921 >> 8);
+      frame.data[7] = sum & 0xFF;
+      mcp->sendMessage(&frame);
+      return;
+    }
     if (frame.can_id == 1016) {
       auto fd = (frame.data[5] & 0b11100000) >> 5;
       switch(fd){
