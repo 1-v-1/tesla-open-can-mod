@@ -97,11 +97,12 @@ The table below shows exactly which CAN messages each hardware variant monitors 
 
 ## Supported Boards
 
-| Board | CAN Interface | Library | Status |
-|-------|--------------|---------|--------|
-| Adafruit Feather RP2040 CAN | MCP2515 over SPI | `mcp2515.h` (autowp) | Tested |
-| Adafruit Feather M4 CAN Express (ATSAME51) | Native MCAN peripheral | `Adafruit_CAN` (`CANSAME5x`) | Compiles, needs on-vehicle testing |
-| ESP32 with CAN transceiver (e.g. ESP32-DevKitC + SN65HVD230) | Native TWAI peripheral | ESP-IDF `driver/twai.h` | Compiles, needs on-vehicle testing |
+| Board                                                                   | CAN Interface              | Library                      | Status                             |
+|-------------------------------------------------------------------------|----------------------------|------------------------------|------------------------------------|
+| Adafruit Feather RP2040 CAN                                             | MCP2515 over SPI           | `mcp2515.h` (autowp)         | Tested                             |
+| Adafruit Feather M4 CAN Express (ATSAME51)                              | Native MCAN peripheral     | `Adafruit_CAN` (`CANSAME5x`) | Compiles, needs on-vehicle testing |
+| ESP32 with CAN transceiver (e.g. ESP32-DevKitC + SN65HVD230)            | Native TWAI peripheral     | ESP-IDF `driver/twai.h`      | Compiles, needs on-vehicle testing |
+| [Atomic CAN Base](https://docs.m5stack.com/en/atom/Atomic%20CAN%20Base) | CA-IS3050G over ESP32 TWAI | ESP32 TWAI                   | Tested                             | 
 
 ## Hardware Requirements
 

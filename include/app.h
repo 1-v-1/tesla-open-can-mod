@@ -14,8 +14,10 @@
 using SelectedHandler = HW4Handler;
 #elif defined(HW3)
 using SelectedHandler = HW3Handler;
-#else
+#elif defined(LEGACY)
 using SelectedHandler = LegacyHandler;
+#else
+#error "Define HW4, HW3 or LEGACY in build_flags"
 #endif
 
 static std::unique_ptr<CanDriver> appDriver;
