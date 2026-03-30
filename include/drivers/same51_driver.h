@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CANSAME5x.h>
+#include "../can_frame_types.h"
 #include "can_driver.h"
 
 class SAME51Driver : public CanDriver {

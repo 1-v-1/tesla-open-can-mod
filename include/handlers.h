@@ -3,7 +3,7 @@
 #include <memory>
 #include <algorithm>
 #include "can_frame_types.h"
-#include "can_driver.h"
+#include "drivers/can_driver.h"
 #include "can_helpers.h"
 
 #ifndef NATIVE_BUILD

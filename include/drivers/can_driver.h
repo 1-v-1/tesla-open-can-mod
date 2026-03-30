@@ -1,6 +1,6 @@
 #pragma once
 
-#include "can_frame_types.h"
+#include "../can_frame_types.h"
 
 struct CanDriver {
     virtual bool init() = 0;

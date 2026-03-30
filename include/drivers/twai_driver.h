@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../can_frame_types.h"
 #include "can_driver.h"
 #include <driver/twai.h>
 

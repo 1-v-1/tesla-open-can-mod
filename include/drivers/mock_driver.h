@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "../can_frame_types.h"
 #include "can_driver.h"
 
 class MockDriver : public CanDriver {

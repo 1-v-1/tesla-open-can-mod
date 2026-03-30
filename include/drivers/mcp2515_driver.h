@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <mcp2515.h>
 #include <memory>
+#include "../can_frame_types.h"
 #include "can_driver.h"
 
 class MCP2515Driver : public CanDriver {
