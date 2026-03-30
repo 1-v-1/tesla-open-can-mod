@@ -1,1 +1,4 @@
-﻿/.idea/
+.pio/
+.vscode/
+.idea/
+.cursor/
