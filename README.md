@@ -45,7 +45,7 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
 | `HW3`    | HW3 vehicles     | 1016, 1021          | Same functionality as legacy |
 | `HW4`    | HW4 vehicles     | 1016, 1021          | Extended speed-profile range (5 levels) |
 
-> **Note:** HW4 vehicles on firmware **older than 2026.2.3** do not use FSDV14. If your vehicle is on an earlier firmware version, compile with `HW3` even if your vehicle has HW4 hardware.
+> **Note:** HW4 vehicles on firmware **2026.2.9.X** are on **FSD v14**. However, versions on the **2026.8.X** branch are still on **FSD v13**. If your vehicle is running FSD v13 (including the 2026.8.X branch or anything older than 2026.2.9), compile with `HW3` even if your vehicle has HW4 hardware.
 
 ### How to Determine Your Hardware Variant
 
