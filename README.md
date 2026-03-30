@@ -16,7 +16,7 @@ This allows you to activate an FSD subscription from anywhere in the world.
 
 ## 🛠️ What It Does
 
-This firmware runs on an Adafruit CAN Bus FeatherWing (MCP25625/MCP2515-based). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD).Additionally, ASS (Actually Smart Summon) is no longer restricted by EU regulations.
+This firmware runs on an Adafruit Feather with CAN bus support (RP2040 CAN with MCP2515, or M4 CAN Express with native ATSAME51 CAN). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD). Additionally, ASS (Actually Smart Summon) is no longer restricted by EU regulations.
 
 🚗 Core Function
 - Intercepts specific CAN bus messages
@@ -60,53 +60,144 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
 - **Nag suppression** — clears the hands-on-wheel nag bit.
 - Debug output is printed over Serial at 115200 baud when `enablePrint` is `true`.
 
+## Supported Boards
+
+| Board | CAN Interface | Library | Status |
+|-------|--------------|---------|--------|
+| Adafruit Feather RP2040 CAN | MCP2515 over SPI | `mcp2515.h` (autowp) | Tested |
+| Adafruit Feather M4 CAN Express (ATSAME51) | Native MCAN peripheral | `Adafruit_CAN` (`CANSAME5x`) | Compiles, needs on-vehicle testing |
+
 ## Hardware Requirements
 
-- Adafruit Feather M4 CAN (or compatible board with MCP25625/MCP2515)
-- The board must expose these pins (defined at the top of the sketch):
+- One of the supported boards listed above
+- CAN bus connection to the vehicle (500 kbit/s)
+
+**Feather RP2040 CAN** — the board must expose these pins (defined by the earlephilhower board variant):
   - `PIN_CAN_CS` — SPI chip-select for the MCP2515
   - `PIN_CAN_INTERRUPT` — interrupt pin (unused; polling mode)
   - `PIN_CAN_STANDBY` — CAN transceiver standby control
   - `PIN_CAN_RESET` — MCP2515 hardware reset
-- CAN bus connection to the vehicle (500 kbit/s)
+
+**Feather M4 CAN Express** — uses the native ATSAME51 CAN peripheral; requires:
+  - `PIN_CAN_STANDBY` — CAN transceiver standby control
+  - `PIN_CAN_BOOSTEN` — 3V→5V boost converter enable for CAN signal levels
+
+**Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board (jumper labeled **TERM** on RP2040, **Trm** on M4). The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
 
 ## Installation
 
-### 1. Install the Arduino IDE
+### Option A: Arduino IDE — Flash Only
+
+*Recommended if you just want to flash the firmware onto your board. No command-line tools required.*
+
+#### 1. Install the Arduino IDE
 
 Download from [https://www.arduino.cc/en/software](https://www.arduino.cc/en/software).
 
-### 2. Add the Adafruit Board Package
+#### 2. Add the Board Package
 
+**For Feather RP2040 CAN:**
 1. Open **File → Preferences**.
 2. In **Additional Board Manager URLs**, add:
    ```
    https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
    ```
-3. Go to **Tools → Board → Boards Manager**, search for **Raspberry PI Pico/RP2040** (or the appropriate family for your Feather), and install it.
+3. Go to **Tools → Board → Boards Manager**, search for **Raspberry PI Pico/RP2040**, and install it.
 4. Select **Adafruit Feather RP2040 CAN** as the Board.
 
-### 3. Install Required Libraries
+**For Feather M4 CAN Express:**
+1. In **Additional Board Manager URLs**, add:
+   ```
+   https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+   ```
+2. Install **Adafruit SAMD Boards** from the Boards Manager.
+3. Select **Feather M4 CAN (SAME51)** as the Board.
+4. Install the **Adafruit CAN** library via the Library Manager.
 
-Install the following library via **Sketch → Include Library → Manage Libraries…** or the Arduino Library Manager:
+#### 3. Install Required Libraries
 
-- **MCP2515** by autowp — CAN controller driver (`mcp2515.h`)
+Install via **Sketch → Include Library → Manage Libraries…**:
 
-### 4. Select Your Hardware Target
+- **Feather RP2040 CAN:** MCP2515 by autowp
+- **Feather M4 CAN Express:** Adafruit CAN
 
-Near the top of `RP2040CAN.ino`, change the `HW` define to match your vehicle:
+#### 4. Select Your Board and Vehicle
+
+Near the top of `RP2040CAN.ino`, uncomment the line that matches your **board**:
 
 ```cpp
-#define HW HW3  // Change to LEGACY, HW3, or HW4
+#define DRIVER_MCP2515   // Adafruit Feather RP2040 CAN (MCP2515 over SPI)
+//#define DRIVER_SAME51  // Adafruit Feather M4 CAN Express (native ATSAME51 CAN)
 ```
 
-### 5. Upload
+Then uncomment the line that matches your **vehicle**:
+
+```cpp
+#define LEGACY // HW4, HW3, or LEGACY
+//#define HW3
+//#define HW4
+```
+
+#### 5. Upload
 
 1. Connect the Feather via USB.
 2. Select the correct board and port under **Tools**.
 3. Click **Upload**.
 
-### 6. Wiring
+### Option B: PlatformIO — Development, Testing & Flash
+
+*For developers who want to run unit tests, build for multiple boards, or integrate with CI. Can also flash firmware to the board.*
+
+#### Prerequisites (Windows)
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| [Python 3](https://www.python.org/downloads/) | PlatformIO runtime | `winget install Python.Python.3.14` |
+| [PlatformIO CLI](https://docs.platformio.org/en/latest/core/installation.html) | Build system & test runner | `pip install platformio` |
+| [MinGW-w64 GCC](https://winlibs.com/) | Native test compiler | `winget install BrechtSanders.WinLibs.POSIX.UCRT` |
+
+> After installing MinGW-w64, restart your terminal so `gcc` and `g++` are on PATH. GCC is only needed for `pio test -e native` (host-side unit tests) — cross-compiling to the Feather boards uses PlatformIO's built-in ARM toolchain.
+
+#### Build
+
+1. Select your vehicle by editing the define near the top of `src/main.cpp`:
+   ```cpp
+   #define LEGACY  // Change to HW4, HW3, or LEGACY
+   ```
+   The board is selected automatically by the PlatformIO environment (`-e feather_rp2040_can` or `-e feather_m4_can`).
+
+2. Build for your board:
+   ```bash
+   # Adafruit Feather RP2040 CAN
+   pio run -e feather_rp2040_can
+
+   # Adafruit Feather M4 CAN Express (ATSAME51)
+   pio run -e feather_m4_can
+   ```
+
+#### Flash
+
+Connect the Feather via USB, then upload:
+
+```bash
+# Adafruit Feather RP2040 CAN
+pio run -e feather_rp2040_can --target upload
+
+# Adafruit Feather M4 CAN Express (ATSAME51)
+pio run -e feather_m4_can --target upload
+```
+
+> **Tip:** If the board is not detected, double-press the **Reset** button to enter the UF2 bootloader, then retry the upload command.
+
+#### Run Tests
+
+Unit tests run on your host machine — no hardware required:
+
+```bash
+pio test -e native
+```
+
+### Wiring
 
 The recommended connection point is the [**X179 connector**](https://service.tesla.com/docs/Model3/ElectricalReference/prog-233/connector/x179/):
 
@@ -117,19 +208,14 @@ The recommended connection point is the [**X179 connector**](https://service.tes
 
 Connect the Feather's CAN-H and CAN-L lines to pins 13 and 14 on the X179 connector.
 
-
 The recommended connection point for **legacy Model 3 (2020 and earlier)** is the [**X652 connector**](https://service.tesla.com/docs/Model3/ElectricalReference/prog-187/connector/x652/) if the vehicle is not equipped with the X179 port (varies depending on production date):
+
 | Pin | Signal |
 |-----|--------|
 | 1  | CAN-H  |
-|  2  | CAN-L  |
+| 2  | CAN-L  |
 
 Connect the Feather's CAN-H and CAN-L lines to pins 1 and 2 on the X652 connector.
-
-
-
-
-**Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
 
 ## Speed Profiles
 
@@ -147,9 +233,58 @@ The speed profile controls how aggressively the vehicle drives under FSD. It is 
 | 4 | ❄️ Chill | 🟢 Normal |
 | 5 | — | ❄️ Chill |
 | 6 | — | 🐢 Sloth |
+
 ## Serial Monitor
 
 Open the Serial Monitor at **115200 baud** to see live debug output showing FSD state and the active speed profile. Disable logging by setting `enablePrint = false`.
+
+## Feather M4 CAN Express — Porting Notes
+
+The Adafruit Feather M4 CAN Express (ATSAME51) has a native CAN controller built into the MCU — there is no MCP2515 on this board. The CAN driver abstraction layer handles the differences transparently.
+
+**What changes per board:**
+- **Library:** RP2040 uses `mcp2515.h` (autowp); M4 uses `Adafruit_CAN` (`CANSAME5x` class)
+- **CAN API:** RP2040 uses struct-based read/write (`can_frame`); M4 uses a packet-stream API (`parsePacket`/`beginPacket`/`write`/`endPacket`)
+- **Pin setup:** RP2040 needs `PIN_CAN_CS` (SPI chip-select); M4 needs `PIN_CAN_BOOSTEN` (3V→5V boost enable). Only `PIN_CAN_STANDBY` and `PIN_LED` exist on both boards.
+
+**What stays identical:**
+- All handler structs and bit manipulation logic
+- Vehicle-specific behavior (FSD enable, nag suppression, speed profiles)
+- Serial debug output
+
+## Development & Testing
+
+The project uses [PlatformIO](https://platformio.org/) with the [Unity](https://github.com/ThrowTheSwitch/Unity) test framework.
+
+### Project Structure
+
+```
+include/
+  can_frame_types.h       # Portable CanFrame struct
+  can_driver.h            # Abstract CanDriver interface
+  can_helpers.h           # setBit, readMuxID, isFSDSelectedInUI, setSpeedProfileV12V13
+  handlers.h              # CarManagerBase, LegacyHandler, HW3Handler, HW4Handler
+  drivers/
+    mcp2515_driver.h      # MCP2515 driver (Feather RP2040 CAN)
+    same51_driver.h       # CANSAME5x driver (Feather M4 CAN Express)
+    mock_driver.h         # Mock driver for unit tests
+src/
+  main.cpp                # PlatformIO entry point
+test/
+  test_native_helpers/    # Tests for bit manipulation helpers
+  test_native_legacy/     # LegacyHandler tests
+  test_native_hw3/        # HW3Handler tests
+  test_native_hw4/        # HW4Handler tests
+RP2040CAN.ino             # Arduino IDE entry point (uses same headers)
+```
+
+### Running Tests
+
+```bash
+pio test -e native
+```
+
+Tests run on your host machine — no hardware required. They cover all handler logic including FSD activation, nag suppression, speed profile mapping, and bit manipulation correctness.
 
 ## Disclaimer
 
