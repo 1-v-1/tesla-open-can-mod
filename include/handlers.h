@@ -18,10 +18,18 @@ struct CarManagerBase {
     bool FSDEnabled = false;
     bool enablePrint = true;
     virtual void handleMessage(CanFrame& frame, CanDriver& driver) = 0;
+    virtual const uint32_t* filterIds() const = 0;
+    virtual uint8_t filterIdCount() const = 0;
     virtual ~CarManagerBase() = default;
 };
 
 struct LegacyHandler : public CarManagerBase {
+    const uint32_t* filterIds() const override {
+        static constexpr uint32_t ids[] = {69, 1006};
+        return ids;
+    }
+    uint8_t filterIdCount() const override { return 2; }
+
     void handleMessage(CanFrame& frame, CanDriver& driver) override {
         // STW_ACTN_RQ (0x045 = 69): Follow-Distance-Stalk as Source for Profile Mapping
         // byte[1]: 0x00=Pos1, 0x21=Pos2, 0x42=Pos3, 0x64=Pos4, 0x85=Pos5, 0xA6=Pos6, 0xC8=Pos7
@@ -55,6 +63,12 @@ struct LegacyHandler : public CarManagerBase {
 
 struct HW3Handler : public CarManagerBase {
     int speedOffset = 0;
+
+    const uint32_t* filterIds() const override {
+        static constexpr uint32_t ids[] = {1016, 1021};
+        return ids;
+    }
+    uint8_t filterIdCount() const override { return 2; }
 
     void handleMessage(CanFrame& frame, CanDriver& driver) override {
         if (frame.id == 1016) {
@@ -105,6 +119,12 @@ struct HW3Handler : public CarManagerBase {
 
 struct HW4Handler : public CarManagerBase {
     bool isaSpeedChimeSuppress = DEFAULT_ISA_SPEED_CHIME_SUPPRESS; // suppresses ISA speed chime; speed limit sign will be empty while driving
+
+    const uint32_t* filterIds() const override {
+        static constexpr uint32_t ids[] = {921, 1016, 1021};
+        return ids;
+    }
+    uint8_t filterIdCount() const override { return 3; }
 
     void handleMessage(CanFrame& frame, CanDriver& driver) override {
         if (isaSpeedChimeSuppress && frame.id == 921) {

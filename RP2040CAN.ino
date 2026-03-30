@@ -11,17 +11,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-    This project uses the MCP2515 library (https://github.com/autowp/arduino-mcp2515)
-    Copyright (c) 2013 Seeed Technology Inc.
-    Copyright (c) 2016 Dmitry
-    Licensed under the MIT License. See README.md for the full license text.
 */
 
 // ── Board selection ──────────────────────────────────────────────
-// Uncomment ONE of the following lines to match your Feather board:
+// Uncomment ONE of the following lines to match your board:
 #define DRIVER_MCP2515   // Adafruit Feather RP2040 CAN (MCP2515 over SPI)
 //#define DRIVER_SAME51  // Adafruit Feather M4 CAN Express (native ATSAME51 CAN)
+//#define DRIVER_TWAI    // ESP32 boards with built-in TWAI (CAN) peripheral
 
 // ── Vehicle hardware selection ───────────────────────────────────
 // Uncomment ONE of the following lines to match your vehicle:
@@ -37,16 +33,30 @@
 #include "include/drivers/mcp2515_driver.h"
 #elif defined(DRIVER_SAME51)
 #include "include/drivers/same51_driver.h"
+#elif defined(DRIVER_TWAI)
+#include "include/drivers/twai_driver.h"
+#define TWAI_TX_PIN GPIO_NUM_5
+#define TWAI_RX_PIN GPIO_NUM_4
 #else
-#error "Uncomment DRIVER_MCP2515 or DRIVER_SAME51 at the top of this file"
+#error "Uncomment DRIVER_MCP2515, DRIVER_SAME51, or DRIVER_TWAI at the top of this file"
 #endif
 
 void setup() {
 #if defined(DRIVER_MCP2515)
-    appSetup(std::make_unique<MCP2515Driver>(PIN_CAN_CS), "MCP25625 ready @ 500k");
+    appSetup<MCP2515Driver>(std::make_unique<MCP2515Driver>(PIN_CAN_CS), "MCP25625 ready @ 500k");
 #elif defined(DRIVER_SAME51)
-    appSetup(std::make_unique<SAME51Driver>(), "SAME51 CAN ready @ 500k");
+    appSetup<SAME51Driver>(std::make_unique<SAME51Driver>(), "SAME51 CAN ready @ 500k");
+#elif defined(DRIVER_TWAI)
+    appSetup<TWAIDriver>(std::make_unique<TWAIDriver>(TWAI_TX_PIN, TWAI_RX_PIN), "ESP32 TWAI ready @ 500k");
 #endif
 }
 
-__attribute__((optimize("O3"))) void loop() { appLoop(); }
+__attribute__((optimize("O3"))) void loop() {
+#if defined(DRIVER_MCP2515)
+    appLoop<MCP2515Driver>();
+#elif defined(DRIVER_SAME51)
+    appLoop<SAME51Driver>();
+#elif defined(DRIVER_TWAI)
+    appLoop<TWAIDriver>();
+#endif
+}

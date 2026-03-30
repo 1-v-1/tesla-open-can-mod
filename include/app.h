@@ -21,7 +21,11 @@ using SelectedHandler = LegacyHandler;
 static std::unique_ptr<CanDriver> appDriver;
 static std::unique_ptr<CarManagerBase> appHandler;
 
-static void appSetup(std::unique_ptr<CanDriver> drv, const char* readyMsg) {
+static volatile bool frameReady = true;
+static void canISR() { frameReady = true; }
+
+template<typename Driver>
+static void appSetup(std::unique_ptr<Driver> drv, const char* readyMsg) {
     appHandler = std::make_unique<SelectedHandler>();
     delay(1500);
     Serial.begin(115200);
@@ -32,15 +36,26 @@ static void appSetup(std::unique_ptr<CanDriver> drv, const char* readyMsg) {
     if (!appDriver->init()) {
         Serial.println("CAN init failed");
     }
+
+    appDriver->setFilters(appHandler->filterIds(), appHandler->filterIdCount());
+    if constexpr (Driver::kSupportsISR) {
+        appDriver->enableInterrupt(canISR);
+    }
+
     Serial.println(readyMsg);
 }
 
+template<typename Driver>
 static void appLoop() {
-    CanFrame frame;
-    if (!appDriver->read(frame)) {
-        digitalWrite(PIN_LED, HIGH);
-        return;
+    if constexpr (Driver::kSupportsISR) {
+        if (!frameReady) return;
+        frameReady = false;
     }
-    digitalWrite(PIN_LED, LOW);
-    appHandler->handleMessage(frame, *appDriver);
+
+    CanFrame frame;
+    while (appDriver->read(frame)) {
+        digitalWrite(PIN_LED, LOW);
+        appHandler->handleMessage(frame, *appDriver);
+    }
+    digitalWrite(PIN_LED, HIGH);
 }

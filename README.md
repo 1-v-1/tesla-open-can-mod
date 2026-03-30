@@ -18,7 +18,7 @@ This allows you to activate an FSD subscription from anywhere in the world.
 
 ## 🛠️ What It Does
 
-This firmware runs on an Adafruit Feather with CAN bus support (RP2040 CAN with MCP2515, or M4 CAN Express with native ATSAME51 CAN). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD). Additionally, ASS (Actually Smart Summon) is no longer restricted by EU regulations.
+This firmware runs on an Adafruit Feather with CAN bus support (RP2040 CAN with MCP2515, M4 CAN Express with native ATSAME51 CAN, or any ESP32 board with a built-in TWAI peripheral). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD). Additionally, ASS (Actually Smart Summon) is no longer restricted by EU regulations.
 
 🚗 Core Function
 - Intercepts specific CAN bus messages
@@ -68,6 +68,7 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
 |-------|--------------|---------|--------|
 | Adafruit Feather RP2040 CAN | MCP2515 over SPI | `mcp2515.h` (autowp) | Tested |
 | Adafruit Feather M4 CAN Express (ATSAME51) | Native MCAN peripheral | `Adafruit_CAN` (`CANSAME5x`) | Compiles, needs on-vehicle testing |
+| ESP32 with CAN transceiver (e.g. ESP32-DevKitC + SN65HVD230) | Native TWAI peripheral | ESP-IDF `driver/twai.h` | Compiles, needs on-vehicle testing |
 
 ## Hardware Requirements
 
@@ -84,7 +85,12 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
   - `PIN_CAN_STANDBY` — CAN transceiver standby control
   - `PIN_CAN_BOOSTEN` — 3V→5V boost converter enable for CAN signal levels
 
-**Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board (jumper labeled **TERM** on RP2040, **Trm** on M4). The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
+**ESP32 with CAN transceiver** — uses the native TWAI peripheral; requires:
+  - An external CAN transceiver module (e.g. SN65HVD230, TJA1050, or MCP2551)
+  - `TWAI_TX_PIN` — GPIO connected to the transceiver TX pin (default `GPIO_NUM_5`)
+  - `TWAI_RX_PIN` — GPIO connected to the transceiver RX pin (default `GPIO_NUM_4`)
+
+**Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board (jumper labeled **TERM** on RP2040, **Trm** on M4). If using an ESP32 with an external transceiver that has a termination resistor, remove or disable it as well. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
 
 ## Installation
 
@@ -116,12 +122,21 @@ Download from [https://www.arduino.cc/en/software](https://www.arduino.cc/en/sof
 3. Select **Feather M4 CAN (SAME51)** as the Board.
 4. Install the **Adafruit CAN** library via the Library Manager.
 
+**For ESP32 boards:**
+1. In **Additional Board Manager URLs**, add:
+   ```
+   https://espressif.github.io/arduino-esp32/package_esp32_index.json
+   ```
+2. Install **esp32 by Espressif Systems** from the Boards Manager.
+3. Select your ESP32 board (e.g. **ESP32 Dev Module**).
+
 #### 3. Install Required Libraries
 
 Install via **Sketch → Include Library → Manage Libraries…**:
 
 - **Feather RP2040 CAN:** MCP2515 by autowp
 - **Feather M4 CAN Express:** Adafruit CAN
+- **ESP32:** No additional libraries needed — the TWAI driver is built into the ESP32 Arduino core.
 
 #### 4. Select Your Board and Vehicle
 
@@ -130,6 +145,7 @@ Near the top of `RP2040CAN.ino`, uncomment the line that matches your **board**:
 ```cpp
 #define DRIVER_MCP2515   // Adafruit Feather RP2040 CAN (MCP2515 over SPI)
 //#define DRIVER_SAME51  // Adafruit Feather M4 CAN Express (native ATSAME51 CAN)
+//#define DRIVER_TWAI    // ESP32 boards with built-in TWAI (CAN) peripheral
 ```
 
 Then uncomment the line that matches your **vehicle**:
@@ -166,7 +182,7 @@ Then uncomment the line that matches your **vehicle**:
    ```cpp
    #define LEGACY  // Change to HW4, HW3, or LEGACY
    ```
-   The board is selected automatically by the PlatformIO environment (`-e feather_rp2040_can` or `-e feather_m4_can`).
+   The board is selected automatically by the PlatformIO environment (`-e feather_rp2040_can`, `-e feather_m4_can`, or `-e esp32_twai`).
 
 2. Build for your board:
    ```bash
@@ -175,11 +191,14 @@ Then uncomment the line that matches your **vehicle**:
 
    # Adafruit Feather M4 CAN Express (ATSAME51)
    pio run -e feather_m4_can
+
+   # ESP32 with TWAI (CAN) peripheral
+   pio run -e esp32_twai
    ```
 
 #### Flash
 
-Connect the Feather via USB, then upload:
+Connect the board via USB, then upload:
 
 ```bash
 # Adafruit Feather RP2040 CAN
@@ -187,9 +206,12 @@ pio run -e feather_rp2040_can --target upload
 
 # Adafruit Feather M4 CAN Express (ATSAME51)
 pio run -e feather_m4_can --target upload
+
+# ESP32
+pio run -e esp32_twai --target upload
 ```
 
-> **Tip:** If the board is not detected, double-press the **Reset** button to enter the UF2 bootloader, then retry the upload command.
+> **Tip:** For Feather boards, if the board is not detected, double-press the **Reset** button to enter the UF2 bootloader, then retry the upload command. For ESP32 boards, hold the **BOOT** button during upload if auto-reset does not work.
 
 #### Run Tests
 
@@ -240,14 +262,14 @@ The speed profile controls how aggressively the vehicle drives under FSD. It is 
 
 Open the Serial Monitor at **115200 baud** to see live debug output showing FSD state and the active speed profile. Disable logging by setting `enablePrint = false`.
 
-## Feather M4 CAN Express — Porting Notes
+## Board Porting Notes
 
-The Adafruit Feather M4 CAN Express (ATSAME51) has a native CAN controller built into the MCU — there is no MCP2515 on this board. The CAN driver abstraction layer handles the differences transparently.
+The project uses an abstract `CanDriver` interface so that all vehicle logic (handlers, bit manipulation, speed profiles) is shared across boards. Only the driver implementation changes.
 
 **What changes per board:**
-- **Library:** RP2040 uses `mcp2515.h` (autowp); M4 uses `Adafruit_CAN` (`CANSAME5x` class)
-- **CAN API:** RP2040 uses struct-based read/write (`can_frame`); M4 uses a packet-stream API (`parsePacket`/`beginPacket`/`write`/`endPacket`)
-- **Pin setup:** RP2040 needs `PIN_CAN_CS` (SPI chip-select); M4 needs `PIN_CAN_BOOSTEN` (3V→5V boost enable). Only `PIN_CAN_STANDBY` and `PIN_LED` exist on both boards.
+- **RP2040 CAN:** `mcp2515.h` (autowp) — SPI-based, struct read/write, needs `PIN_CAN_CS`
+- **M4 CAN Express:** `Adafruit_CAN` (`CANSAME5x`) — native MCAN peripheral, packet-stream API, needs `PIN_CAN_BOOSTEN`
+- **ESP32 TWAI:** ESP-IDF `driver/twai.h` — native TWAI peripheral, FreeRTOS queue-based RX, needs an external CAN transceiver and two GPIO pins
 
 **What stays identical:**
 - All handler structs and bit manipulation logic
@@ -266,9 +288,11 @@ include/
   can_driver.h            # Abstract CanDriver interface
   can_helpers.h           # setBit, readMuxID, isFSDSelectedInUI, setSpeedProfileV12V13
   handlers.h              # CarManagerBase, LegacyHandler, HW3Handler, HW4Handler
+  app.h                   # Shared setup/loop logic for all entry points
   drivers/
     mcp2515_driver.h      # MCP2515 driver (Feather RP2040 CAN)
     same51_driver.h       # CANSAME5x driver (Feather M4 CAN Express)
+    twai_driver.h         # ESP32 TWAI driver
     mock_driver.h         # Mock driver for unit tests
 src/
   main.cpp                # PlatformIO entry point
@@ -277,6 +301,7 @@ test/
   test_native_legacy/     # LegacyHandler tests
   test_native_hw3/        # HW3Handler tests
   test_native_hw4/        # HW4Handler tests
+  test_native_twai/       # TWAI filter computation tests
 RP2040CAN.ino             # Arduino IDE entry point (uses same headers)
 ```
 
@@ -292,31 +317,16 @@ Tests run on your host machine — no hardware required. They cover all handler 
 
 **Use this project at your own risk.** Modifying CAN bus messages on a vehicle can lead to unexpected or dangerous behavior. The authors accept no responsibility for any damage to your vehicle, injury, or legal consequences resulting from the use of this software. This project may void your vehicle warranty and may not comply with road safety regulations in your jurisdiction. Always keep your hands on the wheel and stay attentive while driving.
 
+## Third-Party Libraries
+
+This project depends on the following open-source libraries. Their full license texts are in [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES).
+
+| Library | License | Copyright |
+|---------|---------|-----------|
+| [autowp/arduino-mcp2515](https://github.com/autowp/arduino-mcp2515) | MIT | (c) 2013 Seeed Technology Inc., (c) 2016 Dmitry |
+| [adafruit/Adafruit_CAN](https://github.com/adafruit/Adafruit_CAN) | MIT | (c) 2017 Sandeep Mistry |
+| [espressif/esp-idf](https://github.com/espressif/esp-idf) (TWAI driver) | Apache 2.0 | (c) 2015-2025 Espressif Systems (Shanghai) CO LTD |
+
 ## License
 
 This project is licensed under the **GNU General Public License v3.0** — see the [GPL-3.0 License](https://www.gnu.org/licenses/gpl-3.0.html) for details.
-
-### Third-Party Licenses
-
-This project uses the [MCP2515 library](https://github.com/autowp/arduino-mcp2515) by autowp, which is licensed under the MIT License:
-
-> Copyright (c) 2013 Seeed Technology Inc.  
-> Copyright (c) 2016 Dmitry
->
-> Permission is hereby granted, free of charge, to any person obtaining a copy
-> of this software and associated documentation files (the "Software"), to deal
-> in the Software without restriction, including without limitation the rights
-> to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-> copies of the Software, and to permit persons to whom the Software is
-> furnished to do so, subject to the following conditions:
->
-> The above copyright notice and this permission notice shall be included in all
-> copies or substantial portions of the Software.
->
-> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-> IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-> FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-> AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-> LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-> OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-> SOFTWARE.

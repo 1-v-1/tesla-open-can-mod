@@ -104,8 +104,23 @@ void test_legacy_ignores_unrelated_can_id() {
     TEST_ASSERT_EQUAL(0, mock.sent.size());
 }
 
+// --- Filter IDs ---
+
+void test_legacy_filter_ids_count() {
+    TEST_ASSERT_EQUAL_UINT8(2, handler.filterIdCount());
+}
+
+void test_legacy_filter_ids_values() {
+    const uint32_t* ids = handler.filterIds();
+    TEST_ASSERT_EQUAL_UINT32(69, ids[0]);
+    TEST_ASSERT_EQUAL_UINT32(1006, ids[1]);
+}
+
 int main() {
     UNITY_BEGIN();
+
+    RUN_TEST(test_legacy_filter_ids_count);
+    RUN_TEST(test_legacy_filter_ids_values);
 
     RUN_TEST(test_legacy_stalk_pos0_sets_profile_2);
     RUN_TEST(test_legacy_stalk_pos1_sets_profile_2);
