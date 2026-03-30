@@ -18,12 +18,15 @@
 #include <mcp2515.h>
 
 
-#define LEGACY LegacyHandler
-#define HW3 HW3Handler
-#define HW4 HW4Handler //HW4 since Version 2026.2.3 uses FSDV14, before that compile for HW3, even for HW4 vehicles.
+#define LEGACY // for what car to compile: HW4, HW3, or LEGACY
 
-
-#define HW HW3  //for what car to compile
+#if defined(HW4)
+#define HW HW4Handler
+#elif defined(HW3)
+#define HW HW3Handler
+#elif defined(LEGACY)
+#define HW LegacyHandler
+#endif
 
 bool enablePrint = true;
 
