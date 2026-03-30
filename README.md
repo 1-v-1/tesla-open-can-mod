@@ -41,15 +41,15 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
 
 | Define   | Target           | Listens on CAN IDs | Notes |
 |----------|------------------|---------------------|-------|
-| `LEGACY` | HW3 Retrofit     | 1006                | Sets FSD enable bit and speed profile |
-| `HW3`    | HW3 vehicles     | 1016, 1021          | Adds speed-offset control via follow-distance |
+| `LEGACY` | HW3 Retrofit     | 1006, 69            | Sets FSD enable bit and speed profile control via follow distance |
+| `HW3`    | HW3 vehicles     | 1016, 1021          | Same functionality as legacy |
 | `HW4`    | HW4 vehicles     | 1016, 1021          | Extended speed-profile range (5 levels) |
 
 > **Note:** HW4 vehicles on firmware **older than 2026.2.3** do not use FSDV14. If your vehicle is on an earlier firmware version, compile with `HW3` even if your vehicle has HW4 hardware.
 
 ### How to Determine Your Hardware Variant
 
-- **Legacy** — Your vehicle has a **portrait-oriented center screen** and **HW3**. This applies to older Model S and Model X vehicles retrofitted with HW3.
+- **Legacy** — Your vehicle has a **portrait-oriented center screen** and **HW3**. This applies to older (pre Palladium) Model S and Model X vehicles that originally came with or were retrofitted with HW3.
 - **HW3** — Your vehicle has a **landscape-oriented center screen** and **HW3**. You can check your hardware version under **Controls → Software → Additional Vehicle Information** on the vehicle's touchscreen.
 - **HW4** — Same as above, but the Additional Vehicle Information screen shows **HW4**.
 
@@ -135,17 +135,8 @@ Connect the Feather's CAN-H and CAN-L lines to pins 1 and 2 on the X652 connecto
 
 The speed profile controls how aggressively the vehicle drives under FSD. It is configured differently depending on the hardware variant:
 
-### Legacy (HW3 Retrofit)
 
-Because the Legacy variant transmits follow distance differently, it uses a **speed offset value** (in km/h) to select the profile:
-
-| Speed Offset (km/h) | Profile |
-|----------------------|---------|
-| 28                   | Chill   |
-| 29                   | Normal  |
-| 30                   | Hurry   |
-
-### HW3 & HW4 Profiles
+### Legacy, HW3 & HW4 Profiles
 
 
 
