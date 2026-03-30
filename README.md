@@ -62,12 +62,45 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
 - **Nag suppression** — clears the hands-on-wheel nag bit.
 - Debug output is printed over Serial at 115200 baud when `enablePrint` is `true`.
 
+### CAN Message Details
+
+The table below shows exactly which CAN messages each hardware variant monitors and what modifications are made.
+
+#### Legacy (HW3 Retrofit)
+
+| CAN ID | Hex | Name | Direction | Mux | Action |
+|---|---|---|---|---|---|
+| 69 | 0x045 | STW_ACTN_RQ | Read only | — | Read follow-distance stalk position → map to speed profile |
+| 1006 | 0x3EE | — | Read + Modify | 0 | Read FSD state from UI; set bit 46 (FSD enable); write speed profile to bits 1–2 of byte 6 |
+| 1006 | 0x3EE | — | Read + Modify | 1 | Clear bit 19 (nag suppression) |
+
+#### HW3
+
+| CAN ID | Hex | Name | Direction | Mux | Action |
+|---|---|---|---|---|---|
+| 1016 | 0x3F8 | UI_driverAssistControl | Read only | — | Read follow-distance setting → map to speed profile |
+| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 0 | Read FSD state from UI; calculate speed offset; set bit 46 (FSD enable); write speed profile to bits 1–2 of byte 6 |
+| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 1 | Clear bit 19 (nag suppression) |
+| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 2 | Write speed offset to bits 6–7 of byte 0 and bits 0–5 of byte 1 |
+
+#### HW4
+
+| CAN ID | Hex | Name | Direction | Mux | Action |
+|---|---|---|---|---|---|
+| 921 | 0x399 | DAS_status | Read + Modify | — | ISA speed chime suppression (optional, disabled by default) |
+| 1016 | 0x3F8 | UI_driverAssistControl | Read only | — | Read follow-distance setting → map to speed profile (5 levels) |
+| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 0 | Read FSD state from UI; set bit 46 (FSD enable); set bit 60 (FSD V14); set bit 59 (emergency vehicle detection) |
+| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 1 | Clear bit 19 (nag suppression); set bit 47 |
+| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 2 | Write speed profile to bits 4–6 of byte 7 |
+
+> Signal names sourced from [tesla-can-explorer](https://github.com/mikegapinski/tesla-can-explorer) by [@mikegapinski](https://x.com/mikegapinski).
+
 ## Supported Boards
 
 | Board | CAN Interface | Library | Status |
 |-------|--------------|---------|--------|
 | Adafruit Feather RP2040 CAN | MCP2515 over SPI | `mcp2515.h` (autowp) | Tested |
-| Adafruit Feather M4 CAN Express (ATSAME51) | Native MCAN peripheral | `Adafruit_CAN` (`CANSAME5x`) | Compiles, needs on-vehicle testing |
+| Adafruit Feather M4 CAN Express (ATSAME51) | Native MCAN peripheral | `Adafruit_CAN` (`CANSAME5x`) | Tested |
 
 ## Hardware Requirements
 
@@ -287,6 +320,10 @@ pio test -e native
 ```
 
 Tests run on your host machine — no hardware required. They cover all handler logic including FSD activation, nag suppression, speed profile mapping, and bit manipulation correctness.
+
+## Warning
+
+**This project is for testing and educational purposes only.** Sending incorrect CAN bus messages to your vehicle can cause unexpected behavior, disable safety-critical systems, or permanently damage electronic components. The CAN bus controls everything from braking and steering to airbags — a malformed message can have serious consequences. If you don't fully understand what you're doing, **do not install this on your car**.
 
 ## Disclaimer
 
