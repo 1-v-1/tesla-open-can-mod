@@ -219,8 +219,24 @@ void test_hw4_isa_suppress_returns_early_no_further_processing() {
     TEST_ASSERT_EQUAL(1, mock.sent.size()); // only the ISA send, not any FSD logic
 }
 
+// --- Filter IDs ---
+
+void test_hw4_filter_ids_count() {
+    TEST_ASSERT_EQUAL_UINT8(3, handler.filterIdCount());
+}
+
+void test_hw4_filter_ids_values() {
+    const uint32_t* ids = handler.filterIds();
+    TEST_ASSERT_EQUAL_UINT32(921, ids[0]);
+    TEST_ASSERT_EQUAL_UINT32(1016, ids[1]);
+    TEST_ASSERT_EQUAL_UINT32(1021, ids[2]);
+}
+
 int main() {
     UNITY_BEGIN();
+
+    RUN_TEST(test_hw4_filter_ids_count);
+    RUN_TEST(test_hw4_filter_ids_values);
 
     RUN_TEST(test_hw4_follow_distance_1_sets_profile_3);
     RUN_TEST(test_hw4_follow_distance_2_sets_profile_2);
