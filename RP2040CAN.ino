@@ -11,6 +11,11 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    This project uses the MCP2515 library (https://github.com/autowp/arduino-mcp2515)
+    Copyright (c) 2013 Seeed Technology Inc.
+    Copyright (c) 2016 Dmitry
+    Licensed under the MIT License. See README.md for the full license text.
 */
 
 #include "memory"
