@@ -127,7 +127,7 @@ struct HW3Handler : public CarManagerBase {
     }
     if (frame.can_id == 1021) {
       auto index = readMuxID(frame);
-      auto FSDEnabled = isFSDSelectedInUI(frame);
+      if (index == 0) FSDEnabled = isFSDSelectedInUI(frame);
       if (index == 0 && FSDEnabled) {
         speedOffset = std::max(std::min(((uint8_t)((frame.data[3] >> 1) & 0x3F) - 30) * 5, 100), 0);
         auto off = (uint8_t)((frame.data[3] >> 1) & 0x3F) - 30;
@@ -173,7 +173,7 @@ struct HW4Handler : public CarManagerBase {
     }
     if (frame.can_id == 1021) {
       auto index = readMuxID(frame);
-      auto FSDEnabled = isFSDSelectedInUI(frame);
+      if (index == 0) FSDEnabled = isFSDSelectedInUI(frame);
       if (index == 0 && FSDEnabled) {
         setBit(frame, 46, true);
         setBit(frame, 60, true);
