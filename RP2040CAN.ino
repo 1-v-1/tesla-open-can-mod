@@ -74,16 +74,19 @@ inline void setBit(can_frame& frame, int bit, bool value) {
 
 struct LegacyHandler : public CarManagerBase {
   virtual void handelMessage(can_frame& frame) override {
+    // STW_ACTN_RQ (0x045 = 69): Follow-Distance-Stalk as Source for Profile Mapping
+    // byte[1]: 0x00=Pos1, 0x21=Pos2, 0x42=Pos3, 0x64=Pos4, 0x85=Pos5, 0xA6=Pos6, 0xC8=Pos7
+    if (frame.can_id == 69) {
+      uint8_t pos = frame.data[1] >> 5;
+      if      (pos <= 1) speedProfile = 2; 
+      else if (pos == 2) speedProfile = 1; 
+      else               speedProfile = 0;  
+      return;
+    }
     if (frame.can_id == 1006) {
       auto index = readMuxID(frame);
-      if (index == 0 && isFSDSelectedInUI(frame)) {
-        auto off = (uint8_t)((frame.data[3] >> 1) & 0x3F) - 30;
-        switch (off) {
-          case 2: speedProfile = 2; break;
-          case 1: speedProfile = 1; break;
-          case 0: speedProfile = 0; break;
-          default: break;
-        }
+      if (index == 0) FSDEnabled = isFSDSelectedInUI(frame);
+      if (index == 0 && FSDEnabled) {
         setBit(frame, 46, true);
         setSpeedProfileV12V13(frame, speedProfile);
         mcp->sendMessage(&frame);
