@@ -16,7 +16,7 @@ This allows you to activate an FSD subscription from anywhere in the world.
 
 ## 🛠️ What It Does
 
-This firmware runs on an Adafruit CAN Bus FeatherWing (MCP25625/MCP2515-based). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD).
+This firmware runs on an Adafruit CAN Bus FeatherWing (MCP25625/MCP2515-based). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD).Additionally, ASS (Actually Smart Summon) is no longer restricted by EU regulations.
 
 🚗 Core Function
 - Intercepts specific CAN bus messages
