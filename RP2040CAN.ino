@@ -25,7 +25,7 @@
 //#define HW3              //HW3
 //#define HW4              //HW4
 
-// ── BEHAVIOUR OPTIONS ───────────────────────────────────
+// ── BEHAVIOUR OPTIONS ────────────────────────────────────────────
 // Uncomment any of the following lines:
 //#define ISA_SPEED_CHIME_SUPPRESS       // Suppress ISA speed chime; speed limit sign will be empty while driving
 #define EMERGENCY_VEHICLE_DETECTION      // Enable emergency vehicle detection
