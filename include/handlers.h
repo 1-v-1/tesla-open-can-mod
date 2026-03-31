@@ -36,6 +36,8 @@ struct LegacyHandler : public CarManagerBase
         // byte[1]: 0x00=Pos1, 0x21=Pos2, 0x42=Pos3, 0x64=Pos4, 0x85=Pos5, 0xA6=Pos6, 0xC8=Pos7
         if (frame.id == 69)
         {
+            if (frame.dlc < 2)
+                return;
             uint8_t pos = frame.data[1] >> 5;
             if (pos <= 1)
                 speedProfile = 2;
@@ -47,6 +49,8 @@ struct LegacyHandler : public CarManagerBase
         }
         if (frame.id == 1006)
         {
+            if (frame.dlc < 8)
+                return;
             auto index = readMuxID(frame);
             if (index == 0)
                 FSDEnabled = isFSDSelectedInUI(frame);
@@ -86,6 +90,8 @@ struct HW3Handler : public CarManagerBase
     {
         if (frame.id == 1016)
         {
+            if (frame.dlc < 6)
+                return;
             uint8_t followDistance = (frame.data[5] & 0b11100000) >> 5;
             switch (followDistance)
             {
@@ -105,6 +111,8 @@ struct HW3Handler : public CarManagerBase
         }
         if (frame.id == 1021)
         {
+            if (frame.dlc < 8)
+                return;
             auto index = readMuxID(frame);
             if (index == 0)
                 FSDEnabled = isFSDSelectedInUI(frame);
@@ -174,6 +182,8 @@ struct HW4Handler : public CarManagerBase
 #if defined(ISA_SPEED_CHIME_SUPPRESS)
         if (frame.id == 921)
         {
+            if (frame.dlc < 8)
+                return;
             frame.data[1] |= 0x20;
             uint8_t sum = 0;
             for (int i = 0; i < 7; i++)
@@ -186,6 +196,8 @@ struct HW4Handler : public CarManagerBase
 #endif
         if (frame.id == 1016)
         {
+            if (frame.dlc < 6)
+                return;
             auto fd = (frame.data[5] & 0b11100000) >> 5;
             switch (fd)
             {
@@ -208,6 +220,8 @@ struct HW4Handler : public CarManagerBase
         }
         if (frame.id == 1021)
         {
+            if (frame.dlc < 8)
+                return;
             auto index = readMuxID(frame);
             if (index == 0)
                 FSDEnabled = isFSDSelectedInUI(frame);
