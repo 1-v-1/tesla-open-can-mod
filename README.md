@@ -17,7 +17,7 @@ For any use beyond private testing, you are responsible for complying with all a
 
 > **Why is this public?** Some sellers charge up to 500 € for a solution like this. In our opinion, that is massively overpriced. The board costs around 20 €, and even with labor factored in, a fair price is no more than 50 €. This project exists so nobody has to overpay.
 
-## 📌 Prerequisites
+## Prerequisites
 
 **You must have an active FSD package on the vehicle** — either purchased or subscribed. This board enables the FSD functionality on the CAN bus level, but the vehicle still needs a valid FSD entitlement from Tesla.
 
@@ -29,25 +29,25 @@ If FSD subscriptions are not available in your region, you can work around this 
 
 This allows you to activate an FSD subscription from anywhere in the world.
 
-## 🛠️ What It Does
+## What It Does
 
 This firmware runs on an Adafruit Feather with CAN bus support (RP2040 CAN with MCP2515, M4 CAN Express with native ATSAME51 CAN, or any ESP32 board with a built-in TWAI peripheral). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD). Additionally, ASS (Actually Smart Summon) is no longer restricted by EU regulations.
 
-🚗 Core Function
+Core Function
 - Intercepts specific CAN bus messages
 - Re-transmits them onto the vehicle bus
 
 
-🧠 FSD Activation Logic
+FSD Activation Logic
 - Listens for Autopilot-related CAN frames
 - Checks if "Traffic Light and Stop Sign Control" is enabled in the Autopilot settings Uses this setting as a trigger for Full Self-Driving (FSD)
 - Adjusts the required bits in the CAN message to activate FSD
 
-⚙️ Additional Behavior
+Additional Behavior
 - Reads the follow-distance stalk setting
 - Maps it dynamically to a speed profile
 
-⚙️ HW4 - FSD V14 Features
+HW4 - FSD V14 Features
 - Approaching Emergency Vehicle Detection
 
 ### Supported Hardware Variants
@@ -299,11 +299,11 @@ The speed profile controls how aggressively the vehicle drives under FSD. It is 
 
 | Distance | Profile (HW3) | Profile (HW4) |
 | :--- | :--- | :--- |
-| 2 | ⚡ Hurry | 🔥 Max |
-| 3 | 🟢 Normal | ⚡ Hurry |
-| 4 | ❄️ Chill | 🟢 Normal |
-| 5 | — | ❄️ Chill |
-| 6 | — | 🐢 Sloth |
+| 2 | Hurry | Max |
+| 3 | Normal | Hurry |
+| 4 | Chill | Normal |
+| 5 | — | Chill |
+| 6 | — | Sloth |
 
 ## Serial Monitor
 
