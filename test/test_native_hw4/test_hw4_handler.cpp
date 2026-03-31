@@ -8,7 +8,8 @@
 static MockDriver mock;
 static HW4Handler handler;
 
-void setUp() {
+void setUp()
+{
     mock.reset();
     handler = HW4Handler();
     handler.enablePrint = false;
@@ -18,36 +19,41 @@ void tearDown() {}
 
 // --- Speed profile from follow distance (CAN ID 1016) ---
 
-void test_hw4_follow_distance_1_sets_profile_3() {
-    CanFrame f = { .id = 1016 };
+void test_hw4_follow_distance_1_sets_profile_3()
+{
+    CanFrame f = {.id = 1016};
     f.data[5] = 0b00100000; // fd = 1
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL_INT(3, handler.speedProfile);
 }
 
-void test_hw4_follow_distance_2_sets_profile_2() {
-    CanFrame f = { .id = 1016 };
+void test_hw4_follow_distance_2_sets_profile_2()
+{
+    CanFrame f = {.id = 1016};
     f.data[5] = 0b01000000; // fd = 2
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL_INT(2, handler.speedProfile);
 }
 
-void test_hw4_follow_distance_3_sets_profile_1() {
-    CanFrame f = { .id = 1016 };
+void test_hw4_follow_distance_3_sets_profile_1()
+{
+    CanFrame f = {.id = 1016};
     f.data[5] = 0b01100000; // fd = 3
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL_INT(1, handler.speedProfile);
 }
 
-void test_hw4_follow_distance_4_sets_profile_0() {
-    CanFrame f = { .id = 1016 };
+void test_hw4_follow_distance_4_sets_profile_0()
+{
+    CanFrame f = {.id = 1016};
     f.data[5] = 0b10000000; // fd = 4
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL_INT(0, handler.speedProfile);
 }
 
-void test_hw4_follow_distance_5_sets_profile_4() {
-    CanFrame f = { .id = 1016 };
+void test_hw4_follow_distance_5_sets_profile_4()
+{
+    CanFrame f = {.id = 1016};
     f.data[5] = 0b10100000; // fd = 5
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL_INT(4, handler.speedProfile);
@@ -55,26 +61,28 @@ void test_hw4_follow_distance_5_sets_profile_4() {
 
 // --- FSD shadowing fix regression test ---
 
-void test_hw4_fsd_enabled_only_set_on_mux0() {
-    CanFrame f0 = { .id = 1021 };
+void test_hw4_fsd_enabled_only_set_on_mux0()
+{
+    CanFrame f0 = {.id = 1021};
     f0.data[0] = 0x00;
     f0.data[4] = 0x40;
     handler.handleMessage(f0, mock);
     TEST_ASSERT_TRUE(handler.FSDEnabled);
 
     mock.reset();
-    CanFrame f2 = { .id = 1021 };
+    CanFrame f2 = {.id = 1021};
     f2.data[0] = 0x02;
     f2.data[4] = 0x00; // FSD bit not set in mux 2
     handler.handleMessage(f2, mock);
-    TEST_ASSERT_TRUE(handler.FSDEnabled); // latched from mux 0
+    TEST_ASSERT_TRUE(handler.FSDEnabled);   // latched from mux 0
     TEST_ASSERT_EQUAL(1, mock.sent.size()); // mux 2 always sends for HW4
 }
 
 // --- FSD activation (mux 0) ---
 
-void test_hw4_fsd_mux0_sets_bits_46_and_60() {
-    CanFrame f = { .id = 1021 };
+void test_hw4_fsd_mux0_sets_bits_46_and_60()
+{
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x00;
     f.data[4] = 0x40;
     handler.handleMessage(f, mock);
@@ -83,8 +91,9 @@ void test_hw4_fsd_mux0_sets_bits_46_and_60() {
     TEST_ASSERT_EQUAL_HEX8(0x10, mock.sent[0].data[7] & 0x10); // bit 60
 }
 
-void test_hw4_fsd_mux0_sets_emergency_bit59() {
-    CanFrame f = { .id = 1021 };
+void test_hw4_fsd_mux0_sets_emergency_bit59()
+{
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x00;
     f.data[4] = 0x40;
     handler.handleMessage(f, mock);
@@ -92,8 +101,9 @@ void test_hw4_fsd_mux0_sets_emergency_bit59() {
     TEST_ASSERT_EQUAL_HEX8(0x08, mock.sent[0].data[7] & 0x08); // bit 59
 }
 
-void test_hw4_no_send_when_fsd_disabled_mux0() {
-    CanFrame f = { .id = 1021 };
+void test_hw4_no_send_when_fsd_disabled_mux0()
+{
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x00;
     f.data[4] = 0x00;
     handler.handleMessage(f, mock);
@@ -103,21 +113,23 @@ void test_hw4_no_send_when_fsd_disabled_mux0() {
 
 // --- Nag suppression (mux 1) ---
 
-void test_hw4_nag_suppression_clears_bit19_sets_bit47() {
-    CanFrame f = { .id = 1021 };
+void test_hw4_nag_suppression_clears_bit19_sets_bit47()
+{
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x01;
     setBit(f, 19, true);
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL(1, mock.sent.size());
-    TEST_ASSERT_FALSE((mock.sent[0].data[2] >> 3) & 0x01); // bit 19 cleared
+    TEST_ASSERT_FALSE((mock.sent[0].data[2] >> 3) & 0x01);     // bit 19 cleared
     TEST_ASSERT_EQUAL_HEX8(0x80, mock.sent[0].data[5] & 0x80); // bit 47 set
 }
 
 // --- Speed profile injection (mux 2) ---
 
-void test_hw4_mux2_injects_speed_profile() {
+void test_hw4_mux2_injects_speed_profile()
+{
     handler.speedProfile = 3;
-    CanFrame f = { .id = 1021 };
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x02;
     f.data[7] = 0x00;
     handler.handleMessage(f, mock);
@@ -126,9 +138,10 @@ void test_hw4_mux2_injects_speed_profile() {
     TEST_ASSERT_EQUAL_UINT8(3, injected);
 }
 
-void test_hw4_mux2_clears_old_profile_bits() {
+void test_hw4_mux2_clears_old_profile_bits()
+{
     handler.speedProfile = 0;
-    CanFrame f = { .id = 1021 };
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x02;
     f.data[7] = 0x70; // old profile bits all set
     handler.handleMessage(f, mock);
@@ -139,53 +152,60 @@ void test_hw4_mux2_clears_old_profile_bits() {
 
 // --- Send counts ---
 
-void test_hw4_mux0_fsd_enabled_sends_1() {
-    CanFrame f = { .id = 1021 };
+void test_hw4_mux0_fsd_enabled_sends_1()
+{
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x00;
     f.data[4] = 0x40;
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL(1, mock.sent.size());
 }
 
-void test_hw4_mux1_sends_1() {
-    CanFrame f = { .id = 1021 };
+void test_hw4_mux1_sends_1()
+{
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x01;
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL(1, mock.sent.size());
 }
 
-void test_hw4_mux2_sends_1() {
-    CanFrame f = { .id = 1021 };
+void test_hw4_mux2_sends_1()
+{
+    CanFrame f = {.id = 1021};
     f.data[0] = 0x02;
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL(1, mock.sent.size());
 }
 
-void test_hw4_ignores_unrelated_can_id() {
-    CanFrame f = { .id = 999 };
+void test_hw4_ignores_unrelated_can_id()
+{
+    CanFrame f = {.id = 999};
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL(0, mock.sent.size());
 }
 
 // --- ISA speed chime suppression (CAN ID 921) ---
 
-void test_hw4_isa_suppress_sets_bit5_of_data1() {
-    CanFrame f = { .id = 921 };
+void test_hw4_isa_suppress_sets_bit5_of_data1()
+{
+    CanFrame f = {.id = 921};
     f.data[1] = 0x00;
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL(1, mock.sent.size());
     TEST_ASSERT_EQUAL_HEX8(0x20, mock.sent[0].data[1] & 0x20);
 }
 
-void test_hw4_isa_suppress_preserves_existing_data1_bits() {
-    CanFrame f = { .id = 921 };
+void test_hw4_isa_suppress_preserves_existing_data1_bits()
+{
+    CanFrame f = {.id = 921};
     f.data[1] = 0xC3;
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL_HEX8(0xE3, mock.sent[0].data[1]); // 0xC3 | 0x20
 }
 
-void test_hw4_isa_suppress_checksum_correct() {
-    CanFrame f = { .id = 921 };
+void test_hw4_isa_suppress_checksum_correct()
+{
+    CanFrame f = {.id = 921};
     f.data[0] = 0x10;
     f.data[1] = 0x05;
     f.data[2] = 0x00;
@@ -201,27 +221,31 @@ void test_hw4_isa_suppress_checksum_correct() {
     TEST_ASSERT_EQUAL_HEX8(0xD1, mock.sent[0].data[7]);
 }
 
-void test_hw4_isa_suppress_returns_early_no_further_processing() {
+void test_hw4_isa_suppress_returns_early_no_further_processing()
+{
     handler.FSDEnabled = true;
-    CanFrame f = { .id = 921 };
+    CanFrame f = {.id = 921};
     handler.handleMessage(f, mock);
     TEST_ASSERT_EQUAL(1, mock.sent.size()); // only the ISA send, not any FSD logic
 }
 
 // --- Filter IDs ---
 
-void test_hw4_filter_ids_count() {
+void test_hw4_filter_ids_count()
+{
     TEST_ASSERT_EQUAL_UINT8(3, handler.filterIdCount());
 }
 
-void test_hw4_filter_ids_values() {
-    const uint32_t* ids = handler.filterIds();
+void test_hw4_filter_ids_values()
+{
+    const uint32_t *ids = handler.filterIds();
     TEST_ASSERT_EQUAL_UINT32(921, ids[0]);
     TEST_ASSERT_EQUAL_UINT32(1016, ids[1]);
     TEST_ASSERT_EQUAL_UINT32(1021, ids[2]);
 }
 
-int main() {
+int main()
+{
     UNITY_BEGIN();
 
     RUN_TEST(test_hw4_filter_ids_count);
