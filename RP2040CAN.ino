@@ -13,17 +13,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// ── Board selection ──────────────────────────────────────────────
+// ── BOARD SELECTION ──────────────────────────────────────────────
 // Uncomment ONE of the following lines to match your board:
-#define DRIVER_MCP2515   // Adafruit Feather RP2040 CAN (MCP2515 over SPI)
-//#define DRIVER_SAME51  // Adafruit Feather M4 CAN Express (native ATSAME51 CAN)
-//#define DRIVER_TWAI    // ESP32 boards with built-in TWAI (CAN) peripheral
+//#define DRIVER_MCP2515   // Adafruit Feather RP2040 CAN (MCP2515 over SPI)
+//#define DRIVER_SAME51    // Adafruit Feather M4 CAN Express (native ATSAME51 CAN)
+//#define DRIVER_TWAI      // ESP32 boards with built-in TWAI (CAN) peripheral
 
-// ── Vehicle hardware selection ───────────────────────────────────
+// ── VEHICLE HARDWARE SELECTION ───────────────────────────────────
 // Uncomment ONE of the following lines to match your vehicle:
-#define LEGACY // HW4, HW3, or LEGACY
-//#define HW3
-//#define HW4
+//#define LEGACY           //HW3-retrofit
+//#define HW3              //HW3
+//#define HW4              //HW4
+
+// ── BEHAVIOUR OPTIONS ───────────────────────────────────
+// Uncomment any of the following lines:
+//#define ISA_SPEED_CHIME_SUPPRESS       // Suppress ISA speed chime; speed limit sign will be empty while driving
+#define EMERGENCY_VEHICLE_DETECTION      // Enable emergency vehicle detection
 
 #include "include/app.h"
 
