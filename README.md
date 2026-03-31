@@ -59,7 +59,8 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
 | `HW3`    | HW3 vehicles     | 1016, 1021          | Same functionality as legacy |
 | `HW4`    | HW4 vehicles     | 1016, 1021          | Extended speed-profile range (5 levels) |
 
-> **Note:** HW4 vehicles on firmware **2026.2.9.X** are on **FSD v14**. However, versions on the **2026.8.X** branch are still on **FSD v13**. If your vehicle is running FSD v13 (including the 2026.8.X branch or anything older than 2026.2.9), compile with `HW3` even if your vehicle has HW4 hardware.
+> [!NOTE]
+> HW4 vehicles on firmware **2026.2.9.X** are on **FSD v14**. However, versions on the **2026.8.X** branch are still on **FSD v13**. If your vehicle is running FSD v13 (including the 2026.8.X branch or anything older than 2026.2.9), compile with `HW3` even if your vehicle has HW4 hardware.
 
 ### How to Determine Your Hardware Variant
 
@@ -136,7 +137,8 @@ The table below shows exactly which CAN messages each hardware variant monitors 
   - `TWAI_TX_PIN` — GPIO connected to the transceiver TX pin (default `GPIO_NUM_5`)
   - `TWAI_RX_PIN` — GPIO connected to the transceiver RX pin (default `GPIO_NUM_4`)
 
-**Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board (jumper labeled **TERM** on RP2040, **Trm** on M4). If using an ESP32 with an external transceiver that has a termination resistor, remove or disable it as well. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
+> [!IMPORTANT]
+> Cut the onboard 120 Ω termination resistor on the Feather CAN board (jumper labeled **TERM** on RP2040, **Trm** on M4). If using an ESP32 with an external transceiver that has a termination resistor, remove or disable it as well. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
 
 ## Installation
 
@@ -257,7 +259,8 @@ pio run -e feather_m4_can --target upload
 pio run -e esp32_twai --target upload
 ```
 
-> **Tip:** For Feather boards, if the board is not detected, double-press the **Reset** button to enter the UF2 bootloader, then retry the upload command. For ESP32 boards, hold the **BOOT** button during upload if auto-reset does not work.
+> [!TIP]
+> For Feather boards, if the board is not detected, double-press the **Reset** button to enter the UF2 bootloader, then retry the upload command. For ESP32 boards, hold the **BOOT** button during upload if auto-reset does not work.
 
 #### Run Tests
 
