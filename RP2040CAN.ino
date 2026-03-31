@@ -28,7 +28,7 @@
 // ── BEHAVIOUR OPTIONS ────────────────────────────────────────────
 // Uncomment any of the following lines:
 // #define ISA_SPEED_CHIME_SUPPRESS       // Suppress ISA speed chime; speed limit sign will be empty while driving
-// #define EMERGENCY_VEHICLE_DETECTION      // Enable emergency vehicle detection
+// #define EMERGENCY_VEHICLE_DETECTION    // Enable emergency vehicle detection
 
 #include "include/app.h"
 
