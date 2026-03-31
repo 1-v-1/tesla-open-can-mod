@@ -1,23 +1,22 @@
-# Community Discord: 
- https://discord.gg/ZTQKAUTd2F
+# Tesla Open Can Mod
 
-## Warning
+[Community Discord](https://discord.gg/ZTQKAUTd2F)
 
-**This project is for testing and educational purposes only.** Sending incorrect CAN bus messages to your vehicle can cause unexpected behavior, disable safety-critical systems, or permanently damage electronic components. The CAN bus controls everything from braking and steering to airbags — a malformed message can have serious consequences. If you don't fully understand what you're doing, **do not install this on your car**.
+An open-source general-purpose CAN bus modification tool for Tesla vehicles. While FSD enablement was the starting point, the goal is to expose and control everything accessible via CAN — as a fully open project.
 
-## Disclaimer
+Some sellers charge up to 500 € for a solution like this. The hardware costs around 20 €, and even with labor factored in, a fair price is no more than 50 €. This project exists so nobody has to overpay.
 
-**Use this project at your own risk.** This project is intended for testing purposes only and for use on **private property**. Modifying CAN bus messages on a vehicle can lead to unexpected or dangerous behavior.
+> [!WARNING]
+> **This project is for testing and educational purposes only.** Sending incorrect CAN bus messages to your vehicle can cause unexpected behavior, disable safety-critical systems, or permanently damage electronic components. The CAN bus controls everything from braking and steering to airbags — a malformed message can have serious consequences. If you don't fully understand what you're doing, **do not install this on your car**.
 
-The authors accept no responsibility for any damage to your vehicle, injury, or legal consequences resulting from the use of this software. This project may void your vehicle warranty and **may not comply with road safety regulations in your jurisdiction**.
+> [!CAUTION]
+> **Use this project at your own risk.** This project is intended for testing purposes only and for use on **private property**. Modifying CAN bus messages on a vehicle can lead to unexpected or dangerous behavior.
+>
+> The authors accept no responsibility for any damage to your vehicle, injury, or legal consequences resulting from the use of this software. This project may void your vehicle warranty and **may not comply with road safety regulations in your jurisdiction**.
+>
+> For any use beyond private testing, you are responsible for complying with all applicable local laws and regulations. Always keep your hands on the wheel and stay attentive while driving.
 
-For any use beyond private testing, you are responsible for complying with all applicable local laws and regulations. Always keep your hands on the wheel and stay attentive while driving.
-
-# CanFeather – Tesla FSD CAN Bus Enabler
-
-> **Why is this public?** Some sellers charge up to 500 € for a solution like this. In our opinion, that is massively overpriced. The board costs around 20 €, and even with labor factored in, a fair price is no more than 50 €. This project exists so nobody has to overpay.
-
-## 📌 Prerequisites
+## Prerequisites
 
 **You must have an active FSD package on the vehicle** — either purchased or subscribed. This board enables the FSD functionality on the CAN bus level, but the vehicle still needs a valid FSD entitlement from Tesla.
 
@@ -29,25 +28,25 @@ If FSD subscriptions are not available in your region, you can work around this 
 
 This allows you to activate an FSD subscription from anywhere in the world.
 
-## 🛠️ What It Does
+## What It Does
 
 This firmware runs on an Adafruit Feather with CAN bus support (RP2040 CAN with MCP2515, M4 CAN Express with native ATSAME51 CAN, or any ESP32 board with a built-in TWAI peripheral). It intercepts specific CAN bus messages to enable and configure Full Self-Driving (FSD). Additionally, ASS (Actually Smart Summon) is no longer restricted by EU regulations.
 
-🚗 Core Function
+Core Function
 - Intercepts specific CAN bus messages
 - Re-transmits them onto the vehicle bus
 
 
-🧠 FSD Activation Logic
+FSD Activation Logic
 - Listens for Autopilot-related CAN frames
 - Checks if "Traffic Light and Stop Sign Control" is enabled in the Autopilot settings Uses this setting as a trigger for Full Self-Driving (FSD)
 - Adjusts the required bits in the CAN message to activate FSD
 
-⚙️ Additional Behavior
+Additional Behavior
 - Reads the follow-distance stalk setting
 - Maps it dynamically to a speed profile
 
-⚙️ HW4 - FSD V14 Features
+HW4 - FSD V14 Features
 - Approaching Emergency Vehicle Detection
 
 ### Supported Hardware Variants
@@ -60,7 +59,8 @@ Select your hardware in RP2040CAN.ino via the #define HW directive:
 | `HW3`    | HW3 vehicles     | 1016, 1021          | Same functionality as legacy |
 | `HW4`    | HW4 vehicles     | 1016, 1021          | Extended speed-profile range (5 levels) |
 
-> **Note:** HW4 vehicles on firmware **2026.2.9.X** are on **FSD v14**. However, versions on the **2026.8.X** branch are still on **FSD v13**. If your vehicle is running FSD v13 (including the 2026.8.X branch or anything older than 2026.2.9), compile with `HW3` even if your vehicle has HW4 hardware.
+> [!NOTE]
+> HW4 vehicles on firmware **2026.2.9.X** are on **FSD v14**. However, versions on the **2026.8.X** branch are still on **FSD v13**. If your vehicle is running FSD v13 (including the 2026.8.X branch or anything older than 2026.2.9), compile with `HW3` even if your vehicle has HW4 hardware.
 
 ### How to Determine Your Hardware Variant
 
@@ -137,7 +137,8 @@ The table below shows exactly which CAN messages each hardware variant monitors 
   - `TWAI_TX_PIN` — GPIO connected to the transceiver TX pin (default `GPIO_NUM_5`)
   - `TWAI_RX_PIN` — GPIO connected to the transceiver RX pin (default `GPIO_NUM_4`)
 
-**Important:** Cut the onboard 120 Ω termination resistor on the Feather CAN board (jumper labeled **TERM** on RP2040, **Trm** on M4). If using an ESP32 with an external transceiver that has a termination resistor, remove or disable it as well. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
+> [!IMPORTANT]
+> Cut the onboard 120 Ω termination resistor on the Feather CAN board (jumper labeled **TERM** on RP2040, **Trm** on M4). If using an ESP32 with an external transceiver that has a termination resistor, remove or disable it as well. The vehicle's CAN bus already has its own termination, and adding a second resistor will cause communication errors.
 
 ## Installation
 
@@ -221,6 +222,7 @@ Then uncomment the line that matches your **vehicle**:
 | [PlatformIO CLI](https://docs.platformio.org/en/latest/core/installation.html) | Build system & test runner | `pip install platformio` |
 | [MinGW-w64 GCC](https://winlibs.com/) | Native test compiler | `winget install BrechtSanders.WinLibs.POSIX.UCRT` |
 
+> [!TIP]
 > After installing MinGW-w64, restart your terminal so `gcc` and `g++` are on PATH. GCC is only needed for `pio test -e native` (host-side unit tests) — cross-compiling to the Feather boards uses PlatformIO's built-in ARM toolchain.
 
 #### Build
@@ -258,7 +260,8 @@ pio run -e feather_m4_can --target upload
 pio run -e esp32_twai --target upload
 ```
 
-> **Tip:** For Feather boards, if the board is not detected, double-press the **Reset** button to enter the UF2 bootloader, then retry the upload command. For ESP32 boards, hold the **BOOT** button during upload if auto-reset does not work.
+> [!TIP]
+> For Feather boards, if the board is not detected, double-press the **Reset** button to enter the UF2 bootloader, then retry the upload command. For ESP32 boards, hold the **BOOT** button during upload if auto-reset does not work.
 
 #### Run Tests
 
@@ -299,11 +302,11 @@ The speed profile controls how aggressively the vehicle drives under FSD. It is 
 
 | Distance | Profile (HW3) | Profile (HW4) |
 | :--- | :--- | :--- |
-| 2 | ⚡ Hurry | 🔥 Max |
-| 3 | 🟢 Normal | ⚡ Hurry |
-| 4 | ❄️ Chill | 🟢 Normal |
-| 5 | — | ❄️ Chill |
-| 6 | — | 🐢 Sloth |
+| 2 | Hurry | Max |
+| 3 | Normal | Hurry |
+| 4 | Chill | Normal |
+| 5 | — | Chill |
+| 6 | — | Sloth |
 
 ## Serial Monitor
 
