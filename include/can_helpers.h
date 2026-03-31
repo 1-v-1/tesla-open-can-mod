@@ -9,7 +9,12 @@ inline uint8_t readMuxID(const CanFrame &frame)
 
 inline bool isFSDSelectedInUI(const CanFrame &frame)
 {
+#if defined(FORCE_FSD)
+    (void)frame;
+    return true;
+#else
     return (frame.data[4] >> 6) & 0x01;
+#endif
 }
 
 inline void setSpeedProfileV12V13(CanFrame &frame, int profile)

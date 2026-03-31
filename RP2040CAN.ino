@@ -21,14 +21,15 @@
 
 // ── VEHICLE HARDWARE SELECTION ───────────────────────────────────
 // Uncomment ONE of the following lines to match your vehicle:
-// #define LEGACY           //HW3-retrofit
-// #define HW3              //HW3
-// #define HW4              //HW4
+// #define LEGACY           // HW3-retrofit
+// #define HW3              // HW3
+// #define HW4              // HW4
 
 // ── BEHAVIOUR OPTIONS ────────────────────────────────────────────
 // Uncomment any of the following lines:
 // #define ISA_SPEED_CHIME_SUPPRESS       // Suppress ISA speed chime; speed limit sign will be empty while driving
 // #define EMERGENCY_VEHICLE_DETECTION    // Enable emergency vehicle detection
+// #define FORCE_FSD                      // Always enable FSD without requiring "Traffic Light and Stop Sign Control" toggle
 
 #include "include/app.h"
 
