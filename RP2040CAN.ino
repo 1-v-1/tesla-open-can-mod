@@ -15,20 +15,20 @@
 
 // ── BOARD SELECTION ──────────────────────────────────────────────
 // Uncomment ONE of the following lines to match your board:
-// #define DRIVER_MCP2515   // Adafruit Feather RP2040 CAN (MCP2515 over SPI)
-// #define DRIVER_SAME51    // Adafruit Feather M4 CAN Express (native ATSAME51 CAN)
-// #define DRIVER_TWAI      // ESP32 boards with built-in TWAI (CAN) peripheral
+//#define DRIVER_MCP2515   // Adafruit Feather RP2040 CAN (MCP2515 over SPI)
+//#define DRIVER_SAME51    // Adafruit Feather M4 CAN Express (native ATSAME51 CAN)
+//#define DRIVER_TWAI      // ESP32 boards with built-in TWAI (CAN) peripheral
 
 // ── VEHICLE HARDWARE SELECTION ───────────────────────────────────
 // Uncomment ONE of the following lines to match your vehicle:
-// #define LEGACY           //HW3-retrofit
-// #define HW3              //HW3
-// #define HW4              //HW4
+//#define LEGACY           //HW3-retrofit
+//#define HW3              //HW3
+//#define HW4              //HW4
 
 // ── BEHAVIOUR OPTIONS ────────────────────────────────────────────
 // Uncomment any of the following lines:
-// #define ISA_SPEED_CHIME_SUPPRESS       // Suppress ISA speed chime; speed limit sign will be empty while driving
-// #define EMERGENCY_VEHICLE_DETECTION      // Enable emergency vehicle detection
+//#define ISA_SPEED_CHIME_SUPPRESS       // Suppress ISA speed chime; speed limit sign will be empty while driving
+#define EMERGENCY_VEHICLE_DETECTION      // Enable emergency vehicle detection
 
 #include "include/app.h"
 
@@ -46,8 +46,7 @@
 #error "Uncomment DRIVER_MCP2515, DRIVER_SAME51, or DRIVER_TWAI at the top of this file"
 #endif
 
-void setup()
-{
+void setup() {
 #if defined(DRIVER_MCP2515)
     appSetup<MCP2515Driver>(std::make_unique<MCP2515Driver>(PIN_CAN_CS), "MCP25625 ready @ 500k");
 #elif defined(DRIVER_SAME51)
@@ -57,8 +56,7 @@ void setup()
 #endif
 }
 
-__attribute__((optimize("O3"))) void loop()
-{
+__attribute__((optimize("O3"))) void loop() {
 #if defined(DRIVER_MCP2515)
     appLoop<MCP2515Driver>();
 #elif defined(DRIVER_SAME51)

@@ -4,29 +4,25 @@
 #include "../can_frame_types.h"
 #include "can_driver.h"
 
-class MockDriver : public CanDriver
-{
+class MockDriver : public CanDriver {
 public:
     static constexpr bool kSupportsISR = false;
 
     std::vector<CanFrame> sent;
 
     bool init() override { return true; }
-    void setFilters(const uint32_t * /*ids*/, uint8_t /*count*/) override {}
+    void setFilters(const uint32_t* /*ids*/, uint8_t /*count*/) override {}
     bool enableInterrupt(void (* /*onReady*/)()) override { return false; }
 
-    bool read(CanFrame & /*frame*/) override
-    {
+    bool read(CanFrame& /*frame*/) override {
         return false;
     }
 
-    void send(const CanFrame &frame) override
-    {
+    void send(const CanFrame& frame) override {
         sent.push_back(frame);
     }
 
-    void reset()
-    {
+    void reset() {
         sent.clear();
     }
 };
