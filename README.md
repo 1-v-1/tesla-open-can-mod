@@ -13,7 +13,7 @@ The authors accept no responsibility for any damage to your vehicle, injury, or 
 
 For any use beyond private testing, you are responsible for complying with all applicable local laws and regulations. Always keep your hands on the wheel and stay attentive while driving.
 
-# CanFeather – Tesla FSD CAN Bus Enabler
+# Tesla Open Can Mod
 
 > **Why is this public?** Some sellers charge up to 500 € for a solution like this. In our opinion, that is massively overpriced. The board costs around 20 €, and even with labor factored in, a fair price is no more than 50 €. This project exists so nobody has to overpay.
 
