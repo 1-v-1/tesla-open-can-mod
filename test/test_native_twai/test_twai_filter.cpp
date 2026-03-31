@@ -3,17 +3,21 @@
 
 // Extracted filter computation logic from TWAIDriver::setFilters() so we can
 // unit-test the math without the ESP-IDF TWAI hardware API.
-struct TwaiFilterResult {
+struct TwaiFilterResult
+{
     uint32_t acceptance_code;
     uint32_t acceptance_mask;
 };
 
-static TwaiFilterResult computeTwaiFilter(const uint32_t* ids, uint8_t count) {
+static TwaiFilterResult computeTwaiFilter(const uint32_t *ids, uint8_t count)
+{
     TwaiFilterResult r = {};
-    if (count == 0) return r;
+    if (count == 0)
+        return r;
 
     uint32_t differ = 0;
-    for (uint8_t i = 1; i < count; i++) {
+    for (uint8_t i = 1; i < count; i++)
+    {
         differ |= ids[0] ^ ids[i];
     }
     uint32_t base = ids[0] & ~differ;
@@ -22,7 +26,8 @@ static TwaiFilterResult computeTwaiFilter(const uint32_t* ids, uint8_t count) {
     return r;
 }
 
-static bool filterAccepts(const TwaiFilterResult& f, uint32_t id) {
+static bool filterAccepts(const TwaiFilterResult &f, uint32_t id)
+{
     uint32_t rx = id << 21;
     return (rx & ~f.acceptance_mask) == (f.acceptance_code & ~f.acceptance_mask);
 }
@@ -32,13 +37,15 @@ void tearDown() {}
 
 // --- Single ID filter (Legacy-like: 2 IDs far apart) ---
 
-void test_twai_filter_legacy_accepts_id_69() {
+void test_twai_filter_legacy_accepts_id_69()
+{
     uint32_t ids[] = {69, 1006};
     auto f = computeTwaiFilter(ids, 2);
     TEST_ASSERT_TRUE(filterAccepts(f, 69));
 }
 
-void test_twai_filter_legacy_accepts_id_1006() {
+void test_twai_filter_legacy_accepts_id_1006()
+{
     uint32_t ids[] = {69, 1006};
     auto f = computeTwaiFilter(ids, 2);
     TEST_ASSERT_TRUE(filterAccepts(f, 1006));
@@ -46,19 +53,22 @@ void test_twai_filter_legacy_accepts_id_1006() {
 
 // --- HW3 filter (2 close IDs) ---
 
-void test_twai_filter_hw3_accepts_id_1016() {
+void test_twai_filter_hw3_accepts_id_1016()
+{
     uint32_t ids[] = {1016, 1021};
     auto f = computeTwaiFilter(ids, 2);
     TEST_ASSERT_TRUE(filterAccepts(f, 1016));
 }
 
-void test_twai_filter_hw3_accepts_id_1021() {
+void test_twai_filter_hw3_accepts_id_1021()
+{
     uint32_t ids[] = {1016, 1021};
     auto f = computeTwaiFilter(ids, 2);
     TEST_ASSERT_TRUE(filterAccepts(f, 1021));
 }
 
-void test_twai_filter_hw3_rejects_unrelated_id() {
+void test_twai_filter_hw3_rejects_unrelated_id()
+{
     uint32_t ids[] = {1016, 1021};
     auto f = computeTwaiFilter(ids, 2);
     // 1016 = 0x3F8, 1021 = 0x3FD, differ at bits 2,0
@@ -69,25 +79,29 @@ void test_twai_filter_hw3_rejects_unrelated_id() {
 
 // --- HW4 filter (3 IDs) ---
 
-void test_twai_filter_hw4_accepts_id_921() {
+void test_twai_filter_hw4_accepts_id_921()
+{
     uint32_t ids[] = {921, 1016, 1021};
     auto f = computeTwaiFilter(ids, 3);
     TEST_ASSERT_TRUE(filterAccepts(f, 921));
 }
 
-void test_twai_filter_hw4_accepts_id_1016() {
+void test_twai_filter_hw4_accepts_id_1016()
+{
     uint32_t ids[] = {921, 1016, 1021};
     auto f = computeTwaiFilter(ids, 3);
     TEST_ASSERT_TRUE(filterAccepts(f, 1016));
 }
 
-void test_twai_filter_hw4_accepts_id_1021() {
+void test_twai_filter_hw4_accepts_id_1021()
+{
     uint32_t ids[] = {921, 1016, 1021};
     auto f = computeTwaiFilter(ids, 3);
     TEST_ASSERT_TRUE(filterAccepts(f, 1021));
 }
 
-void test_twai_filter_hw4_rejects_distant_id() {
+void test_twai_filter_hw4_rejects_distant_id()
+{
     uint32_t ids[] = {921, 1016, 1021};
     auto f = computeTwaiFilter(ids, 3);
     TEST_ASSERT_FALSE(filterAccepts(f, 100));
@@ -95,13 +109,15 @@ void test_twai_filter_hw4_rejects_distant_id() {
 
 // --- HW3: tight filter rejects multiple unrelated IDs ---
 
-void test_twai_filter_hw3_rejects_id_500() {
+void test_twai_filter_hw3_rejects_id_500()
+{
     uint32_t ids[] = {1016, 1021};
     auto f = computeTwaiFilter(ids, 2);
     TEST_ASSERT_FALSE(filterAccepts(f, 500));
 }
 
-void test_twai_filter_hw3_rejects_id_0() {
+void test_twai_filter_hw3_rejects_id_0()
+{
     uint32_t ids[] = {1016, 1021};
     auto f = computeTwaiFilter(ids, 2);
     TEST_ASSERT_FALSE(filterAccepts(f, 0));
@@ -109,7 +125,8 @@ void test_twai_filter_hw3_rejects_id_0() {
 
 // --- HW4: another rejection ---
 
-void test_twai_filter_hw4_rejects_id_500() {
+void test_twai_filter_hw4_rejects_id_500()
+{
     uint32_t ids[] = {921, 1016, 1021};
     auto f = computeTwaiFilter(ids, 3);
     TEST_ASSERT_FALSE(filterAccepts(f, 500));
@@ -117,7 +134,8 @@ void test_twai_filter_hw4_rejects_id_500() {
 
 // --- Legacy: wide gap means wider mask (false positives expected) ---
 
-void test_twai_filter_legacy_rejects_id_500() {
+void test_twai_filter_legacy_rejects_id_500()
+{
     uint32_t ids[] = {69, 1006};
     auto f = computeTwaiFilter(ids, 2);
     TEST_ASSERT_FALSE(filterAccepts(f, 500));
@@ -125,7 +143,8 @@ void test_twai_filter_legacy_rejects_id_500() {
 
 // --- Single ID ---
 
-void test_twai_filter_single_id_exact_match() {
+void test_twai_filter_single_id_exact_match()
+{
     uint32_t ids[] = {500};
     auto f = computeTwaiFilter(ids, 1);
     TEST_ASSERT_TRUE(filterAccepts(f, 500));
@@ -135,14 +154,16 @@ void test_twai_filter_single_id_exact_match() {
 
 // --- Mask correctness ---
 
-void test_twai_filter_single_id_mask_is_exact() {
+void test_twai_filter_single_id_mask_is_exact()
+{
     uint32_t ids[] = {500};
     auto f = computeTwaiFilter(ids, 1);
     TEST_ASSERT_EQUAL_HEX32(500u << 21, f.acceptance_code);
     TEST_ASSERT_EQUAL_HEX32(0x001FFFFF, f.acceptance_mask);
 }
 
-void test_twai_filter_hw4_mask_bits() {
+void test_twai_filter_hw4_mask_bits()
+{
     uint32_t ids[] = {921, 1016, 1021};
     auto f = computeTwaiFilter(ids, 3);
     // 921 ^ 1016 = 0x061, 921 ^ 1021 = 0x064, 1016 ^ 1021 = 0x005
@@ -151,13 +172,15 @@ void test_twai_filter_hw4_mask_bits() {
     TEST_ASSERT_EQUAL_HEX32(expected_mask, f.acceptance_mask);
 }
 
-void test_twai_filter_empty_count_returns_zero() {
+void test_twai_filter_empty_count_returns_zero()
+{
     auto f = computeTwaiFilter(nullptr, 0);
     TEST_ASSERT_EQUAL_HEX32(0, f.acceptance_code);
     TEST_ASSERT_EQUAL_HEX32(0, f.acceptance_mask);
 }
 
-int main() {
+int main()
+{
     UNITY_BEGIN();
 
     RUN_TEST(test_twai_filter_legacy_accepts_id_69);

@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <cstring>
 
-struct CanFrame {
+struct CanFrame
+{
     uint32_t id = 0;
-    uint8_t  dlc = 8;
-    uint8_t  data[8] = {};
+    uint8_t dlc = 8;
+    uint8_t data[8] = {};
 };
