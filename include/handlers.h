@@ -10,9 +10,6 @@
 #include <Arduino.h>
 #endif
 
-constexpr bool enableEmergencyVehicleDetection = true;
-constexpr bool DEFAULT_ISA_SPEED_CHIME_SUPPRESS = false;
-
 struct CarManagerBase {
     int speedProfile = 1;
     bool FSDEnabled = false;
@@ -118,16 +115,22 @@ struct HW3Handler : public CarManagerBase {
 };
 
 struct HW4Handler : public CarManagerBase {
-    bool isaSpeedChimeSuppress = DEFAULT_ISA_SPEED_CHIME_SUPPRESS; // suppresses ISA speed chime; speed limit sign will be empty while driving
-
     const uint32_t* filterIds() const override {
+#if defined(ISA_SPEED_CHIME_SUPPRESS)
         static constexpr uint32_t ids[] = {921, 1016, 1021};
         return ids;
     }
     uint8_t filterIdCount() const override { return 3; }
+#else
+        static constexpr uint32_t ids[] = {1016, 1021};
+        return ids;
+    }
+    uint8_t filterIdCount() const override { return 2; }
+#endif
 
     void handleMessage(CanFrame& frame, CanDriver& driver) override {
-        if (isaSpeedChimeSuppress && frame.id == 921) {
+#if defined(ISA_SPEED_CHIME_SUPPRESS)
+        if (frame.id == 921) {
             frame.data[1] |= 0x20;
             uint8_t sum = 0;
             for (int i = 0; i < 7; i++) sum += frame.data[i];
@@ -136,6 +139,7 @@ struct HW4Handler : public CarManagerBase {
             driver.send(frame);
             return;
         }
+#endif
         if (frame.id == 1016) {
             auto fd = (frame.data[5] & 0b11100000) >> 5;
             switch (fd) {
@@ -152,9 +156,9 @@ struct HW4Handler : public CarManagerBase {
             if (index == 0 && FSDEnabled) {
                 setBit(frame, 46, true);
                 setBit(frame, 60, true);
-                if (enableEmergencyVehicleDetection) {
-                    setBit(frame, 59, true);
-                }
+#if defined(EMERGENCY_VEHICLE_DETECTION)
+                setBit(frame, 59, true);
+#endif
                 driver.send(frame);
             }
             if (index == 1) {

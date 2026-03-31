@@ -169,15 +169,7 @@ void test_hw4_ignores_unrelated_can_id() {
 
 // --- ISA speed chime suppression (CAN ID 921) ---
 
-void test_hw4_isa_suppress_disabled_ignores_921() {
-    handler.isaSpeedChimeSuppress = false;
-    CanFrame f = { .id = 921 };
-    handler.handleMessage(f, mock);
-    TEST_ASSERT_EQUAL(0, mock.sent.size());
-}
-
-void test_hw4_isa_suppress_enabled_sets_bit5_of_data1() {
-    handler.isaSpeedChimeSuppress = true;
+void test_hw4_isa_suppress_sets_bit5_of_data1() {
     CanFrame f = { .id = 921 };
     f.data[1] = 0x00;
     handler.handleMessage(f, mock);
@@ -186,7 +178,6 @@ void test_hw4_isa_suppress_enabled_sets_bit5_of_data1() {
 }
 
 void test_hw4_isa_suppress_preserves_existing_data1_bits() {
-    handler.isaSpeedChimeSuppress = true;
     CanFrame f = { .id = 921 };
     f.data[1] = 0xC3;
     handler.handleMessage(f, mock);
@@ -194,7 +185,6 @@ void test_hw4_isa_suppress_preserves_existing_data1_bits() {
 }
 
 void test_hw4_isa_suppress_checksum_correct() {
-    handler.isaSpeedChimeSuppress = true;
     CanFrame f = { .id = 921 };
     f.data[0] = 0x10;
     f.data[1] = 0x05;
@@ -212,7 +202,6 @@ void test_hw4_isa_suppress_checksum_correct() {
 }
 
 void test_hw4_isa_suppress_returns_early_no_further_processing() {
-    handler.isaSpeedChimeSuppress = true;
     handler.FSDEnabled = true;
     CanFrame f = { .id = 921 };
     handler.handleMessage(f, mock);
@@ -259,8 +248,7 @@ int main() {
     RUN_TEST(test_hw4_mux2_sends_1);
     RUN_TEST(test_hw4_ignores_unrelated_can_id);
 
-    RUN_TEST(test_hw4_isa_suppress_disabled_ignores_921);
-    RUN_TEST(test_hw4_isa_suppress_enabled_sets_bit5_of_data1);
+    RUN_TEST(test_hw4_isa_suppress_sets_bit5_of_data1);
     RUN_TEST(test_hw4_isa_suppress_preserves_existing_data1_bits);
     RUN_TEST(test_hw4_isa_suppress_checksum_correct);
     RUN_TEST(test_hw4_isa_suppress_returns_early_no_further_processing);
