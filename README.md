@@ -16,8 +16,6 @@ Some sellers charge up to 500 € for a solution like this. The hardware costs a
 >
 > For any use beyond private testing, you are responsible for complying with all applicable local laws and regulations. Always keep your hands on the wheel and stay attentive while driving.
 
----
-
 ## Prerequisites
 
 **You must have an active FSD package on the vehicle** — either purchased or subscribed. This board enables the FSD functionality on the CAN bus level, but the vehicle still needs a valid FSD entitlement from Tesla.
