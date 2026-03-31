@@ -51,7 +51,7 @@ HW4 - FSD V14 Features
 
 ### Supported Hardware Variants
 
-Select your hardware in RP2040CAN.ino via the #define HW directive:
+Select your vehicle hardware variant in `RP2040CAN.ino` via the `#define` directive. Arduino IDE and PlatformIO both use the same vehicle and feature defines from that file.
 
 | Define   | Target           | Listens on CAN IDs | Notes |
 |----------|------------------|---------------------|-------|
@@ -227,11 +227,14 @@ Then uncomment the line that matches your **vehicle**:
 
 #### Build
 
-1. Select your vehicle by editing the define near the top of `src/main.cpp`:
+1. Select your board, vehicle, and optional features near the top of `RP2040CAN.ino`:
    ```cpp
-   #define LEGACY  // Change to HW4, HW3, or LEGACY
+   #define DRIVER_MCP2515  // Change to DRIVER_SAME51 or DRIVER_TWAI for other boards
+   #define LEGACY          // Change to HW4, HW3, or LEGACY
+   #define EMERGENCY_VEHICLE_DETECTION  // Optional
    ```
-   The board is selected automatically by the PlatformIO environment (`-e feather_rp2040_can`, `-e feather_m4_can`, or `-e esp32_twai`).
+   PlatformIO reads the active vehicle and optional feature defines from `RP2040CAN.ino`.
+   The `-e` environment still selects the board, so it must match the uncommented driver define in the sketch. If they do not match, the build stops with a clear error.
 
 2. Build for your board:
    ```bash
@@ -243,6 +246,9 @@ Then uncomment the line that matches your **vehicle**:
 
    # ESP32 with TWAI (CAN) peripheral
    pio run -e esp32_twai
+
+   # M5Stack Atomic CAN Base
+   pio run -e m5stack-atomic-can-base
    ```
 
 #### Flash
@@ -258,6 +264,9 @@ pio run -e feather_m4_can --target upload
 
 # ESP32
 pio run -e esp32_twai --target upload
+
+# M5Stack Atomic CAN Base
+pio run -e m5stack-atomic-can-base --target upload
 ```
 
 > [!TIP]

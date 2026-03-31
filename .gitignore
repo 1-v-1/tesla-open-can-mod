@@ -2,3 +2,5 @@
 .vscode/
 .idea/
 .cursor/
+__pycache__
+tests
