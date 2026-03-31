@@ -1,5 +1,18 @@
 # Community Discord: 
  https://discord.gg/ZTQKAUTd2F
+
+## Warning
+
+**This project is for testing and educational purposes only.** Sending incorrect CAN bus messages to your vehicle can cause unexpected behavior, disable safety-critical systems, or permanently damage electronic components. The CAN bus controls everything from braking and steering to airbags — a malformed message can have serious consequences. If you don't fully understand what you're doing, **do not install this on your car**.
+
+## Disclaimer
+
+**Use this project at your own risk.** This project is intended for testing purposes only and for use on **private property**. Modifying CAN bus messages on a vehicle can lead to unexpected or dangerous behavior.
+
+The authors accept no responsibility for any damage to your vehicle, injury, or legal consequences resulting from the use of this software. This project may void your vehicle warranty and **may not comply with road safety regulations in your jurisdiction**.
+
+For any use beyond private testing, you are responsible for complying with all applicable local laws and regulations. Always keep your hands on the wheel and stay attentive while driving.
+
 # CanFeather – Tesla FSD CAN Bus Enabler
 
 > **Why is this public?** Some sellers charge up to 500 € for a solution like this. In our opinion, that is massively overpriced. The board costs around 20 €, and even with labor factored in, a fair price is no more than 50 €. This project exists so nobody has to overpay.
@@ -347,13 +360,7 @@ pio test -e native
 
 Tests run on your host machine — no hardware required. They cover all handler logic including FSD activation, nag suppression, speed profile mapping, and bit manipulation correctness.
 
-## Warning
 
-**This project is for testing and educational purposes only.** Sending incorrect CAN bus messages to your vehicle can cause unexpected behavior, disable safety-critical systems, or permanently damage electronic components. The CAN bus controls everything from braking and steering to airbags — a malformed message can have serious consequences. If you don't fully understand what you're doing, **do not install this on your car**.
-
-## Disclaimer
-
-**Use this project at your own risk.** Modifying CAN bus messages on a vehicle can lead to unexpected or dangerous behavior. The authors accept no responsibility for any damage to your vehicle, injury, or legal consequences resulting from the use of this software. This project may void your vehicle warranty and may not comply with road safety regulations in your jurisdiction. Always keep your hands on the wheel and stay attentive while driving.
 
 ## Third-Party Libraries
 
