@@ -6,7 +6,9 @@ An open-source general-purpose CAN bus modification tool for Tesla vehicles. Whi
 
 Some sellers charge up to 500 € for a solution like this. The hardware costs around 20 €, and even with labor factored in, a fair price is no more than 50 €. This project exists so nobody has to overpay.
 > [!WARNING] Ban  
->**Any attempt to bypass the purchase or subscription requirement for FSD will result in a permanent ban by Tesla. FSD must be purchased or subscribed to.**
+>**Any attempt to bypass the purchase or subscription requirement for Full Self-Driving (FSD) will result in a permanent ban from Tesla services.**
+>
+>**FSD is a premium feature and must be properly purchased or subscribed to.**
 
 
 > [!WARNING]
