@@ -10,6 +10,10 @@
 #include <Arduino.h>
 #endif
 
+#ifndef PIN_LED
+#define PIN_LED 2
+#endif
+
 #if defined(HW4)
 using SelectedHandler = HW4Handler;
 #elif defined(HW3)
