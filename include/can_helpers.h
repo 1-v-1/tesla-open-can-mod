@@ -9,7 +9,12 @@ inline uint8_t readMuxID(const CanFrame &frame)
 
 inline bool isFSDSelectedInUI(const CanFrame &frame)
 {
+#if defined(FORCE_FSD)
+    (void)frame;
+    return true;
+#else
     return (frame.data[4] >> 6) & 0x01;
+#endif
 }
 
 inline void setSpeedProfileV12V13(CanFrame &frame, int profile)
@@ -20,6 +25,8 @@ inline void setSpeedProfileV12V13(CanFrame &frame, int profile)
 
 inline void setBit(CanFrame &frame, int bit, bool value)
 {
+    if (bit < 0 || bit >= 64)
+        return; // bounds guard: CanFrame.data is 8 bytes
     int byteIndex = bit / 8;
     int bitIndex = bit % 8;
     uint8_t mask = static_cast<uint8_t>(1U << bitIndex);

@@ -72,8 +72,9 @@ public:
                 recoverWithCooldown();
             return false;
         }
-        frame.id = msg.identifier;
-        frame.dlc = msg.data_length_code;
+        frame.id  = msg.identifier;
+        frame.dlc = (msg.data_length_code <= 8) ? msg.data_length_code : 8;
+        memset(frame.data, 0, 8);
         memcpy(frame.data, msg.data, frame.dlc);
         return true;
     }
@@ -84,9 +85,10 @@ public:
             return;
 
         twai_message_t msg = {};
+        uint8_t dlc = (frame.dlc <= 8) ? frame.dlc : 8;
         msg.identifier = frame.id;
-        msg.data_length_code = frame.dlc;
-        memcpy(msg.data, frame.data, frame.dlc);
+        msg.data_length_code = dlc;
+        memcpy(msg.data, frame.data, dlc);
 
         // Short timeout (2ms): modified frames should not be dropped, but
         // long blocks (10ms) risk overflowing the 32-deep RX queue.
