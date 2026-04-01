@@ -72,7 +72,7 @@ public:
                 recoverWithCooldown();
             return false;
         }
-        frame.id  = msg.identifier;
+        frame.id = msg.identifier;
         frame.dlc = (msg.data_length_code <= 8) ? msg.data_length_code : 8;
         memset(frame.data, 0, 8);
         memcpy(frame.data, msg.data, frame.dlc);
