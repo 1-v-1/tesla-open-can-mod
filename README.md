@@ -1,6 +1,7 @@
 # Tesla Open Can Mod
 
-[Community Discord](https://discord.gg/ZTQKAUTd2F)
+[Community Discord](https://discord.gg/ZTQKAUTd2F) · [中文版](./README.zh-CN.md)
+
 
 An open-source general-purpose CAN bus modification tool for Tesla vehicles. While FSD enablement was the starting point, the goal is to expose and control everything accessible via CAN — as a fully open project.
 
