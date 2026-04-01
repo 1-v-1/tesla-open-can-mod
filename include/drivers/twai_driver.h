@@ -88,10 +88,10 @@ public:
         msg.data_length_code = frame.dlc;
         memcpy(msg.data, frame.data, frame.dlc);
 
-        // Non-blocking TX: if queue is full, drop the frame rather than
-        // blocking the RX drain loop. On a 500kbps bus with heavy traffic,
-        // a 10ms block can overflow the 32-deep RX queue.
-        if (twai_transmit(&msg, 0) != ESP_OK)
+        // Short timeout (2ms): modified frames should not be dropped, but
+        // long blocks (10ms) risk overflowing the 32-deep RX queue.
+        // At 500kbps, ~8 frames arrive in 2ms — queue handles this fine.
+        if (twai_transmit(&msg, pdMS_TO_TICKS(2)) != ESP_OK)
         {
             if (isBusOff())
                 recoverWithCooldown();
