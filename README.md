@@ -81,30 +81,40 @@ The table below shows exactly which CAN messages each hardware variant monitors 
 
 #### Legacy (HW3 Retrofit)
 
-| CAN ID | Hex | Name | Direction | Mux | Action |
-|---|---|---|---|---|---|
-| 69 | 0x045 | STW_ACTN_RQ | Read only | — | Read follow-distance stalk position → map to speed profile |
-| 1006 | 0x3EE | — | Read + Modify | 0 | Read FSD state from UI; set bit 46 (FSD enable); write speed profile to bits 1–2 of byte 6 |
-| 1006 | 0x3EE | — | Read + Modify | 1 | Clear bit 19 (nag suppression) |
+| CAN ID | Name | R/W | Mux | Bit | Value | Signal | Description |
+|---|---|---|---|---|---|---|---|
+| 69 | STW_ACTN_RQ | R | — | 13–15 | (0–7) | | read stalk |
+| 1006 | — | R+W | 0 | 38 | (0/1) | | read FSD |
+| 1006 | — | R+W | 0 | 46 | 1 | | enable FSD |
+| 1006 | — | R+W | 0 | 49–50 | (0–2) | | inject profile |
+| 1006 | — | R+W | 1 | 19 | 0 | | suppress nag |
 
 #### HW3
 
-| CAN ID | Hex | Name | Direction | Mux | Action |
-|---|---|---|---|---|---|
-| 1016 | 0x3F8 | UI_driverAssistControl | Read only | — | Read follow-distance setting → map to speed profile |
-| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 0 | Read FSD state from UI; calculate speed offset; set bit 46 (FSD enable); write speed profile to bits 1–2 of byte 6 |
-| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 1 | Clear bit 19 (nag suppression) |
-| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 2 | Write speed offset to bits 6–7 of byte 0 and bits 0–5 of byte 1 |
+| CAN ID | Name | R/W | Mux | Bit | Value | Signal | Description |
+|---|---|---|---|---|---|---|---|
+| 1016 | UI_driverAssistControl | R | — | 45–47 | (0–7) | UI_accFollowDistanceSetting | read distance |
+| 1021 | UI_autopilotControl | R+W | 0 | 38 | (0/1) | UI_fsdStopsControlEnabled | read FSD |
+| 1021 | UI_autopilotControl | R+W | 0 | 25–30 | (offset) | | read offset |
+| 1021 | UI_autopilotControl | R+W | 0 | 46 | 1 | | enable FSD |
+| 1021 | UI_autopilotControl | R+W | 0 | 49–50 | (0–2) | | inject profile |
+| 1021 | UI_autopilotControl | R+W | 1 | 19 | 0 | UI_applyEceR79 | suppress nag |
+| 1021 | UI_autopilotControl | R+W | 2 | 6–7, 8–13 | (offset) | | inject offset |
 
 #### HW4
 
-| CAN ID | Hex | Name | Direction | Mux | Action |
-|---|---|---|---|---|---|
-| 921 | 0x399 | DAS_status | Read + Modify | — | ISA speed chime suppression (optional, disabled by default) |
-| 1016 | 0x3F8 | UI_driverAssistControl | Read only | — | Read follow-distance setting → map to speed profile (5 levels) |
-| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 0 | Read FSD state from UI; set bit 46 (FSD enable); set bit 60 (FSD V14); set bit 59 (emergency vehicle detection) |
-| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 1 | Clear bit 19 (nag suppression); set bit 47 |
-| 1021 | 0x3FD | UI_autopilotControl | Read + Modify | 2 | Write speed profile to bits 4–6 of byte 7 |
+| CAN ID | Name | R/W | Mux | Bit | Value | Signal | Description |
+|---|---|---|---|---|---|---|---|
+| 921 | DAS_status | R+W | — | 13 | 1 | DAS_suppressSpeedWarning | suppress chime |
+| 921 | DAS_status | R+W | — | 56–63 | (checksum) | DAS_statusChecksum | update checksum |
+| 1016 | UI_driverAssistControl | R | — | 45–47 | (0–7) | UI_accFollowDistanceSetting | read distance |
+| 1021 | UI_autopilotControl | R+W | 0 | 38 | (0/1) | UI_fsdStopsControlEnabled | read FSD |
+| 1021 | UI_autopilotControl | R+W | 0 | 46 | 1 | | enable FSD |
+| 1021 | UI_autopilotControl | R+W | 0 | 59 | 1 | | enable detection |
+| 1021 | UI_autopilotControl | R+W | 0 | 60 | 1 | | enable V14 |
+| 1021 | UI_autopilotControl | R+W | 1 | 19 | 0 | UI_applyEceR79 | suppress nag |
+| 1021 | UI_autopilotControl | R+W | 1 | 47 | 1 | UI_hardCoreSummon | enable summon |
+| 1021 | UI_autopilotControl | R+W | 2 | 60–62 | (0–4) | | inject profile |
 
 > Signal names sourced from [tesla-can-explorer](https://github.com/mikegapinski/tesla-can-explorer) by [@mikegapinski](https://x.com/mikegapinski).
 
