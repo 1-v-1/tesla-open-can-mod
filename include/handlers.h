@@ -5,16 +5,23 @@
 #include "can_frame_types.h"
 #include "drivers/can_driver.h"
 #include "can_helpers.h"
+#include "shared_types.h"
+#include "log_buffer.h"
 
 #ifndef NATIVE_BUILD
 #include <Arduino.h>
 #endif
 
+inline LogRingBuffer logRing;
+
 struct CarManagerBase
 {
-    int speedProfile = 1;
-    bool FSDEnabled = false;
-    bool enablePrint = true;
+    Shared<int> speedProfile{1};
+    Shared<bool> FSDEnabled{false};
+    Shared<bool> enablePrint{true};
+    Shared<uint32_t> frameCount{0};
+    Shared<uint32_t> framesSent{0};
+    Shared<int> speedOffset{0};
     virtual void handleMessage(CanFrame &frame, CanDriver &driver) = 0;
     virtual const uint32_t *filterIds() const = 0;
     virtual uint8_t filterIdCount() const = 0;
@@ -58,27 +65,37 @@ struct LegacyHandler : public CarManagerBase
             {
                 setBit(frame, 46, true);
                 setSpeedProfileV12V13(frame, speedProfile);
+                framesSent++;
                 driver.send(frame);
             }
             if (index == 1)
             {
                 setBit(frame, 19, false);
+                framesSent++;
                 driver.send(frame);
             }
-#ifndef NATIVE_BUILD
             if (index == 0 && enablePrint)
             {
-                Serial.printf("LegacyHandler: FSD: %d, Profile: %d\n", FSDEnabled, speedProfile);
-            }
+                char buf[LogRingBuffer::kMaxMsgLen];
+                snprintf(buf, sizeof(buf), "LegacyHandler: FSD: %d, Profile: %d",
+                         (bool)FSDEnabled, (int)speedProfile);
+                logRing.push(buf,
+#ifndef NATIVE_BUILD
+                             millis()
+#else
+                             0
 #endif
+                );
+#ifndef NATIVE_BUILD
+                Serial.println(buf);
+#endif
+            }
         }
     }
 };
 
 struct HW3Handler : public CarManagerBase
 {
-    int speedOffset = 0;
-
     const uint32_t *filterIds() const override
     {
         static constexpr uint32_t ids[] = {1016, 1021};
@@ -136,11 +153,13 @@ struct HW3Handler : public CarManagerBase
                 }
                 setBit(frame, 46, true);
                 setSpeedProfileV12V13(frame, speedProfile);
+                framesSent++;
                 driver.send(frame);
             }
             if (index == 1)
             {
                 setBit(frame, 19, false);
+                framesSent++;
                 driver.send(frame);
             }
             if (index == 2 && FSDEnabled)
@@ -149,14 +168,25 @@ struct HW3Handler : public CarManagerBase
                 frame.data[1] &= ~(0b00111111);
                 frame.data[0] |= (speedOffset & 0x03) << 6;
                 frame.data[1] |= (speedOffset >> 2);
+                framesSent++;
                 driver.send(frame);
             }
-#ifndef NATIVE_BUILD
             if (index == 0 && enablePrint)
             {
-                Serial.printf("HW3Handler: FSD: %d, Profile: %d, Offset: %d\n", FSDEnabled, speedProfile, speedOffset);
-            }
+                char buf[LogRingBuffer::kMaxMsgLen];
+                snprintf(buf, sizeof(buf), "HW3Handler: FSD: %d, Profile: %d, Offset: %d",
+                         (bool)FSDEnabled, (int)speedProfile, (int)speedOffset);
+                logRing.push(buf,
+#ifndef NATIVE_BUILD
+                             millis()
+#else
+                             0
 #endif
+                );
+#ifndef NATIVE_BUILD
+                Serial.println(buf);
+#endif
+            }
         }
     }
 };
@@ -190,6 +220,7 @@ struct HW4Handler : public CarManagerBase
                 sum += frame.data[i];
             sum += (921 & 0xFF) + (921 >> 8);
             frame.data[7] = sum & 0xFF;
+            framesSent++;
             driver.send(frame);
             return;
         }
@@ -232,26 +263,39 @@ struct HW4Handler : public CarManagerBase
 #if defined(EMERGENCY_VEHICLE_DETECTION)
                 setBit(frame, 59, true);
 #endif
+                framesSent++;
                 driver.send(frame);
             }
             if (index == 1)
             {
                 setBit(frame, 19, false);
                 setBit(frame, 47, true);
+                framesSent++;
                 driver.send(frame);
             }
             if (index == 2)
             {
                 frame.data[7] &= ~(0x07 << 4);
                 frame.data[7] |= (speedProfile & 0x07) << 4;
+                framesSent++;
                 driver.send(frame);
             }
-#ifndef NATIVE_BUILD
             if (index == 0 && enablePrint)
             {
-                Serial.printf("HW4Handler: FSD: %d, profile: %d\n", FSDEnabled, speedProfile);
-            }
+                char buf[LogRingBuffer::kMaxMsgLen];
+                snprintf(buf, sizeof(buf), "HW4Handler: FSD: %d, Profile: %d",
+                         (bool)FSDEnabled, (int)speedProfile);
+                logRing.push(buf,
+#ifndef NATIVE_BUILD
+                             millis()
+#else
+                             0
 #endif
+                );
+#ifndef NATIVE_BUILD
+                Serial.println(buf);
+#endif
+            }
         }
     }
 };
