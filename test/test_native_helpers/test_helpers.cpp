@@ -147,6 +147,33 @@ void test_setSpeedProfileV12V13_preserves_other_bits()
     TEST_ASSERT_EQUAL_HEX8(0xFB, f.data[6]);
 }
 
+// --- Runtime FORCE_FSD ---
+
+void test_runtime_force_fsd_overrides_when_bit_clear()
+{
+    forceFSDRuntime = true;
+    CanFrame f = {};
+    f.data[4] = 0x00;
+    TEST_ASSERT_TRUE(isFSDSelectedInUI(f));
+    forceFSDRuntime = false;
+}
+
+void test_runtime_force_fsd_off_reads_frame()
+{
+    forceFSDRuntime = false;
+    CanFrame f = {};
+    f.data[4] = 0x00;
+    TEST_ASSERT_FALSE(isFSDSelectedInUI(f));
+}
+
+void test_runtime_force_fsd_off_still_reads_real_bit()
+{
+    forceFSDRuntime = false;
+    CanFrame f = {};
+    f.data[4] = 0x40;
+    TEST_ASSERT_TRUE(isFSDSelectedInUI(f));
+}
+
 int main()
 {
     UNITY_BEGIN();
@@ -172,6 +199,10 @@ int main()
     RUN_TEST(test_setSpeedProfileV12V13_sets_profile_1);
     RUN_TEST(test_setSpeedProfileV12V13_sets_profile_2);
     RUN_TEST(test_setSpeedProfileV12V13_preserves_other_bits);
+
+    RUN_TEST(test_runtime_force_fsd_overrides_when_bit_clear);
+    RUN_TEST(test_runtime_force_fsd_off_reads_frame);
+    RUN_TEST(test_runtime_force_fsd_off_still_reads_real_bit);
 
     return UNITY_END();
 }

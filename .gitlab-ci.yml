@@ -1,0 +1,49 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+stages:
+  - verify
+
+default:
+  interruptible: true
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+      - .cache/pip/
+      - .platformio/
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PLATFORMIO_CORE_DIR: "$CI_PROJECT_DIR/.platformio"
+  PLATFORMIO_VERSION: "6.1.19"
+
+lint:
+  stage: verify
+  image: debian:bookworm-slim
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends clang-format git
+  script:
+    - clang-format --version
+    - git ls-files '*.cpp' '*.h' '*.hpp' '*.ino' | xargs -r clang-format --dry-run --Werror --style=file
+
+tests:
+  stage: verify
+  image: python:3.12-slim
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends build-essential git
+    - pip install "platformio==${PLATFORMIO_VERSION}"
+  script:
+    - mkdir -p test-results
+    - pio test -e native -e native_force_fsd --junit-output-path test-results/junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: test-results/junit.xml
+    paths:
+      - test-results/junit.xml

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "can_frame_types.h"
+#include "shared_types.h"
+
+inline Shared<bool> forceFSDRuntime{false};
 
 inline uint8_t readMuxID(const CanFrame &frame)
 {
@@ -13,6 +16,8 @@ inline bool isFSDSelectedInUI(const CanFrame &frame)
     (void)frame;
     return true;
 #else
+    if (forceFSDRuntime)
+        return true;
     return (frame.data[4] >> 6) & 0x01;
 #endif
 }

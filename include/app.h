@@ -10,6 +10,10 @@
 #include <Arduino.h>
 #endif
 
+#ifndef PIN_LED
+#define PIN_LED 2
+#endif
+
 #if defined(HW4)
 using SelectedHandler = HW4Handler;
 #elif defined(HW3)
@@ -25,6 +29,10 @@ static std::unique_ptr<CarManagerBase> appHandler;
 
 static volatile bool frameReady = true;
 static void canISR() { frameReady = true; }
+
+#if defined(DRIVER_TWAI) && !defined(NATIVE_BUILD)
+#include "web/web_server.h"
+#endif
 
 template <typename Driver>
 static void appSetup(std::unique_ptr<Driver> drv, const char *readyMsg)
@@ -50,6 +58,12 @@ static void appSetup(std::unique_ptr<Driver> drv, const char *readyMsg)
     }
 
     Serial.println(readyMsg);
+
+#if defined(DRIVER_TWAI) && !defined(NATIVE_BUILD)
+    // Delay WiFi init to let CAN stabilize
+    delay(2000);
+    webServerInit();
+#endif
 }
 
 template <typename Driver>
@@ -66,6 +80,7 @@ static void appLoop()
     while (appDriver->read(frame))
     {
         digitalWrite(PIN_LED, LOW);
+        appHandler->frameCount++;
         appHandler->handleMessage(frame, *appDriver);
     }
     digitalWrite(PIN_LED, HIGH);
